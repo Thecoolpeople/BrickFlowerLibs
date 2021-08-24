@@ -5,12 +5,12 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building...'
-				dir('/buildJenkins'){
+				dir('/build'){
 					sh 'npm install --save-dev javascript-obfuscator'
-					sh 'node runBuild.js'
-					sh 'zip -9 -r --exclude=runBuild.js BrickFlowerLib.zip ./'
+					sh 'node ../buildJenkins/runBuild.js'
+					sh 'zip -9 -r BrickFlowerLib.zip ./'
 					archiveArtifacts artifacts: '*.zip', fingerprint: true
-                    
+
                     deleteDir()
 				}
             }
