@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>TESTING</title>
+	
+	<script src="../pre.js"></script>
+	<script src="chart.js"></script>
+	<script src="../post.js"></script>
+</head>
+<body>
+	<h1>TESTING</h1>
+	<h2>Bar chart</h2>
+	<div id="bar"></div>
+</body>
+<script>
+window.onload = function(){
+	document.getElementById("bar").innerHTML = BF.chart.bar({
+		grid:true,
+	}, [
+		[1,2,3,4],
+		[2,5,2,1],
+		[4,3,2,1]
+	])
+}
+</script>
+</html>
