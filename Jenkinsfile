@@ -7,7 +7,8 @@ pipeline {
                 echo 'Building...'
 				dir('build'){
 					sh 'npm install --save-dev javascript-obfuscator'
-					sh 'node ../buildJenkins/runBuild.js'
+                    sh 'cp ../buildJenkins/runBuild.js runBuild.js'
+					sh 'node runBuild.js'
 					sh 'zip -9 -r BrickFlowerLib.zip ./'
 					archiveArtifacts artifacts: '*.zip', fingerprint: true
 
