@@ -34,4 +34,4 @@ files.forEach(f => {
 
 
 	
-fs.writeFileSync("../build/build.js", obfuscator(file))
+fs.writeFileSync("build.js", obfuscator(file))
