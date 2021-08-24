@@ -5,7 +5,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building...'
-				dir('/build'){
+				dir('build'){
 					sh 'npm install --save-dev javascript-obfuscator'
 					sh 'node ../buildJenkins/runBuild.js'
 					sh 'zip -9 -r BrickFlowerLib.zip ./'
