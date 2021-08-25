@@ -21,9 +21,9 @@ let obfuscator = function(file){
 
 //building core.js
 let files = [
-    "../pre.js",
+    "pre.js",
 	"",	//THE FILES
-	"../post.js",
+	"post.js",
 ]
 
 let file = ""

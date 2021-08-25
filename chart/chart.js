@@ -16,6 +16,7 @@ BF.chart.bar = function(config, data){
         size: [400, 400],  //width, height
         distance: [2, 8], //[bar distance, additional between groups]
         colors: ["blue", "green", "red", "grey", "orange"],
+		maxHeight: false,
 
         
         axis: false,
@@ -26,7 +27,7 @@ BF.chart.bar = function(config, data){
 
     let nrData = data.length
 	let maxLength = nrData>0?Math.max(...(data.map(d=>d.length))):0
-    let maxHeight = nrData>0?Math.max(...(data.map(d=>Math.max(...d)))):0
+    let maxHeight = conf.maxHeight?conf.maxHeight:(nrData>0?Math.max(...(data.map(d=>Math.max(...d)))):0)
     let spaceLeft = [0, conf.size[0], 0, conf.size[1]]
 
     let svg = ['<svg width="'+conf.size[0]+'" height="'+conf.size[1]+'">']
