@@ -34,8 +34,10 @@ BF.chart.bar = function(config, data){
     
     //draw axis
     if(conf.axis){
-        spaceLeft[0] += 20
-        spaceLeft[3] += 20
+        spaceLeft[0] += 40
+		spaceLeft[1] -= 20
+        spaceLeft[2] += 30
+		spaceLeft[3] -= 20
     }
 
     //draw bars
@@ -58,10 +60,31 @@ BF.chart.bar = function(config, data){
 
     //draw grid
     if(conf.grid){
+		let icount = 0
         for(let i = 0; i <= maxHeight; i+=conf.gridStep){
-            svg[1+nrData*maxLength+i] = '<line x1="'+spaceLeft[0]+'" y1="'+(spaceLeft[3]-barConf.singleHeight*i)+'" x2="'+spaceLeft[1]+'" y2="'+(spaceLeft[3]-barConf.singleHeight*i)+'" stroke="black" stroke-width="1" stroke-opacity:"0.4" />'
+			let y = Math.floor(conf.size[1]-barConf.singleHeight*i-spaceLeft[2])
+			
+			let c = '<line x1="'+(spaceLeft[0]-5)+'" y1="'+y+'" x2="'+(spaceLeft[1]-5)+'" y2="'+y+'" stroke="black" stroke-width="1" stroke-opacity:"0.5" />'	//axis height line
+			c += '<text text-anchor="end" dy=".3em" x="'+(spaceLeft[0]-8)+'" y="'+y+'">'+i+'</text>'	//left axis text
+			svg[1+nrData*maxLength+icount] = c
+			icount++;
         }
     }
-    console.log(svg)
+    return svg.join("")+'</svg>'
+}
+
+BF.chart.pie = function(config, data){
+    let conf = Object.assign({
+        size: [400, 400],  //width, height
+        colors: ["blue", "green", "red", "grey", "orange"],
+        text: false,
+    }, config);
+
+    let svg = ['<svg width="'+conf.size[0]+'" height="'+conf.size[1]+'">']
+	let svgI = 1
+	
+	svg[svgI] = ""; svgI++;
+    
+    
     return svg.join("")+'</svg>'
 }

@@ -12,18 +12,28 @@
 <body>
 	<h1>TESTING</h1>
 	<h2>Bar chart</h2>
-	<div id="bar"></div>
+	<div id="bar" style="border: 1px solid black;"></div>
+	<h2>Pie chart</h2>
+	<div id="pie" style="border: 1px solid black;"></div>
 </body>
 <script>
 window.onload = function(){
-	document.getElementById("bar").innerHTML = BF.chart.bar({
-		grid:true,
-		axis: false,
+	let svgBar = BF.chart.bar({
+		size: [500, 500],
+		grid:true, gridStep:0.5,
+		axis: true,
+		maxHeight: 6,
 	}, [
 		[1,2,3,4],
 		[2,5,2,1],
 		[4,3,2,1]
 	])
+	document.getElementById("bar").innerHTML = svgBar
+	
+	let svgPie = BF.chart.pie({
+		size: [500, 500],
+	}, [15, 15, 30, 40])
+	document.getElementById("pie").innerHTML = svgPie
 }
 </script>
 </html>
