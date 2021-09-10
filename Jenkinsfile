@@ -5,14 +5,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building...'
-                dir('build')
-                {
-                    deleteDir()
-                }
-                dir('build')
-                {
-                    
-                }
+                sh 'rm build/*'
 				dir('buildJenkins')
 				{
 					sh 'npm install javascript-obfuscator'
