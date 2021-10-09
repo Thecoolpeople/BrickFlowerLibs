@@ -6,12 +6,12 @@ pipeline {
             steps {
                 echo 'Building...'
                 sh 'rm build/*'
-				dir('buildJenkins')
-				{
-					sh 'npm install javascript-obfuscator'
-					sh 'zip -9 -r BrickFlowerLib.zip ../build/'
-					archiveArtifacts artifacts: '*.zip', fingerprint: true
-				}
+                dir('buildJenkins')
+                {
+                    sh 'npm install javascript-obfuscator'
+                    sh 'zip -9 -r BrickFlowerLib.zip ../build/'
+                    archiveArtifacts artifacts: '*.zip', fingerprint: true
+                }
             }
         }
         stage('Test') {

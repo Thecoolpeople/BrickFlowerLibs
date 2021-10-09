@@ -4,24 +4,18 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TESTING</title>
-
+    
     <script src="../pre.js"></script>
-    <script src="osgui.js"></script>
+    <script src="browserdb.js"></script>
     <script src="../post.js"></script>
 </head>
 <body>
     <h1>TESTING</h1>
-    <div id="desktop"></div>
+    
 </body>
 <script>
-let osgui = new BF.osgui({
-    htmlElement: document.getElementById("desktop"),
-    width: "500px",
-})
 window.onload = function(){
-    osgui.init()
-    let id = osgui.createWindow()
-    console.log(id)
+    BDB = BF.browserdb("test", 1)
 }
 </script>
 </html>

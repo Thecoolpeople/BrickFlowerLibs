@@ -1,2 +1,2 @@
 if(typeof BF == "undefined")
-	BF = {}
+    BF = {}

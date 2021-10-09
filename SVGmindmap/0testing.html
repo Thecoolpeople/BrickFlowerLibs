@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TESTING</title>
+    
+    <script src="../pre.js"></script>
+    <script src="mindmap.js"></script>
+    <script src="../post.js"></script>
+</head>
+<body>
+    <h1>TESTING</h1>
+    <h2>Mindmap</h2>
+    <div id="svgMindmap"></div>
+</body>
+<script>
+window.onload = function(){
+    let svgMindmap = BF.svg.mindmap({
+        size: [500, 200]
+    },[
+        //{title:'bla', color:{back, text, border}, sub:[], size:16}  //size is in px
+        {title:"ROOT", sub:[1,2], pos:['right', 'right'], size:16},
+        {title:"SUB1", sub:[3]},
+        {title:"SUB2\nThe best sub"},
+        {title:"SUB1\nNr: 1"}
+    ])
+    document.getElementById("svgMindmap").innerHTML = svgMindmap
+}
+</script>
+</html>

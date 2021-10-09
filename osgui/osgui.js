@@ -66,6 +66,25 @@ BF.osgui = function(config){
         bar.style.position = "relative"
         bar.style.top = "0px"
         bar.style.left = "0px"
+
+        let close = document.createElement("div")
+        close.innerHTML = "X"
+        close.style.position = "relative"
+        close.style.float = "right"
+        bar.appendChild(close)
+
+        let maximize = document.createElement("div")
+        maximize.innerHTML = "O"
+        maximize.style.position = "relative"
+        maximize.style.float = "right"
+        bar.appendChild(maximize)
+
+        let minimize = document.createElement("div")
+        minimize.innerHTML = "_"
+        minimize.style.position = "relative"
+        minimize.style.float = "right"
+        bar.appendChild(minimize)
+
         w.appendChild(bar)
 
 

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TESTING</title>
+    
+    <script src="../pre.js"></script>
+    <script src="chart.js"></script>
+    <script src="../post.js"></script>
+</head>
+<body>
+    <h1>TESTING</h1>
+    <h2>Bar chart</h2>
+    <div id="bar" style="border: 1px solid black;"></div>
+    <h2>Pie chart</h2>
+    <div id="pie" style="border: 1px solid black;"></div>
+    <h2>Line chart</h2>
+    <div id="line" style="border: 1px solid black;"></div>
+</body>
+<script>
+window.onload = function(){
+    let svgBar = BF.svg.chart.bar({
+        size: [500, 500],
+        grid:true, gridStep:0.5,
+        axis: true,
+        maxHeight: 6,
+    }, [
+        [1,2,3,4],
+        [2,5,2,1],
+        [4,3,2,1],
+    ])
+    document.getElementById("bar").innerHTML = svgBar
+    
+    let svgPie = BF.svg.chart.pie({
+        size: [500, 500],
+    }, [30, 15, 40, 15])
+    svgPie += BF.svg.chart.pie({
+        size: [500, 500],
+    }, [100])
+    document.getElementById("pie").innerHTML = svgPie
+
+    let svgLine = BF.svg.chart.line({
+        size: [500, 500],
+        grid:true, gridStep:1,
+        axis: true,
+        maxHeight: 6,
+    }, [
+        [1,2,3,4],
+        [2,5,2,1],
+        [4,3,2,2],
+    ])
+    svgLine += BF.svg.chart.line({
+        size: [500, 500],
+        grid:true, gridStep:1,
+        axis: true,
+        maxHeight: 6,
+        mode:"bezier",
+    }, [
+        [1,2,3,4],
+        [2,5,2,1],
+        [4,3,2,2],
+    ])
+    document.getElementById("line").innerHTML = svgLine
+}
+</script>
+</html>

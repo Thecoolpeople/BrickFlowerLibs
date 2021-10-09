@@ -9,14 +9,15 @@
 create awesome graphs, only with svg
 */
 
-BF.chart = {}
+if(typeof BF.svg == "undefined") BF.svg = {}
+BF.svg.chart = {}
 
-BF.chart.bar = function(config, data){
+BF.svg.chart.bar = function(config, data){
     let conf = Object.assign({
         size: [400, 400],  //width, height
         distance: [2, 8], //[bar distance, additional between groups]
         colors: ["blue", "green", "red", "grey", "orange"],
-		maxHeight: false,
+        maxHeight: false,
 
         
         axis: false,
@@ -25,18 +26,19 @@ BF.chart.bar = function(config, data){
     }, config);
 
     let nrData = data.length
-	let maxLength = nrData>0?Math.max(...(data.map(d=>d.length))):0
+    let maxLength = nrData>0?Math.max(...(data.map(d=>d.length))):0
     let maxHeight = conf.maxHeight?conf.maxHeight:(nrData>0?Math.max(...(data.map(d=>Math.max(...d)))):0)
     let spaceLeft = [0, conf.size[0], 0, conf.size[1]]
 
     let svg = ['<svg width="'+conf.size[0]+'" height="'+conf.size[1]+'">']
+    let svgI = 0
     
     //draw axis
     if(conf.axis){
         spaceLeft[0] += 40
-		spaceLeft[1] -= 20
+        spaceLeft[1] -= 20
         spaceLeft[2] += 30
-		spaceLeft[3] -= 20
+        spaceLeft[3] -= 20
     }
 
     //draw bars
@@ -52,27 +54,24 @@ BF.chart.bar = function(config, data){
     for(di in data){
         let x = spaceLeft[0] + (barConf.width + conf.distance[0])*di
         for(ei in data[di]){
-            svg[Number(1) + Number(di*maxLength) + Number(ei)] = drawBar(barConf, x, y, data[di][ei], conf.colors[di % conf.colors.length]) + (config.text?"":"")
+            svg[++svgI] = drawBar(barConf, x, y, data[di][ei], conf.colors[di % conf.colors.length]) + (config.text?"":"")
             x += (barConf.width + conf.distance[0])*nrData + (nrData>1?conf.distance[1]:0)
         }
     }
 
     //draw grid
     if(conf.grid){
-		let icount = 0
         for(let i = 0; i <= maxHeight; i+=conf.gridStep){
-			let y = Math.floor(conf.size[1]-barConf.singleHeight*i-spaceLeft[2])
-			
-			let c = '<line x1="'+(spaceLeft[0]-5)+'" y1="'+y+'" x2="'+(spaceLeft[1]-5)+'" y2="'+y+'" stroke="black" stroke-width="0.5" stroke-opacity:"0.5" />'	//axis height line
-			c += '<text text-anchor="end" dy=".3em" x="'+(spaceLeft[0]-8)+'" y="'+y+'">'+i+'</text>'	//left axis text
-			svg[1+nrData*maxLength+icount] = c
-			icount++;
+            let y = Math.floor(conf.size[1]-barConf.singleHeight*i-spaceLeft[2])
+            
+            svg[++svgI] = '<line x1="'+(spaceLeft[0]-5)+'" y1="'+y+'" x2="'+(spaceLeft[1]-5)+'" y2="'+y+'" stroke="black" stroke-width="0.5" stroke-opacity:"0.5" />'    //axis height line
+            svg[++svgI] += '<text text-anchor="end" dy=".3em" x="'+(spaceLeft[0]-8)+'" y="'+y+'">'+i+'</text>'    //left axis text
         }
     }
     return svg.join("")+'</svg>'
 }
 
-BF.chart.pie = function(config, data){
+BF.svg.chart.pie = function(config, data){
     let conf = Object.assign({
         size: [400, 400],  //width, height
         colors: ["blue", "green", "red", "grey", "orange"],
@@ -115,7 +114,7 @@ BF.chart.pie = function(config, data){
     return svg.join("")+'</svg>'
 }
 
-BF.chart.line = function(config, data){
+BF.svg.chart.line = function(config, data){
     let conf = Object.assign({
         size: [400, 400],  //width, height
         colors: ["blue", "green", "red", "grey", "orange"],
@@ -137,9 +136,9 @@ BF.chart.line = function(config, data){
     //draw axis
     if(conf.axis){
         spaceLeft[0] += 40
-		spaceLeft[1] -= 20
+        spaceLeft[1] -= 20
         spaceLeft[2] += 30
-		spaceLeft[3] -= 20
+        spaceLeft[3] -= 20
     }
 
     let lineConf = {
@@ -168,10 +167,10 @@ BF.chart.line = function(config, data){
     //draw grid
     if(conf.grid){
         for(let i = 0; i <= maxHeight; i+=conf.gridStep){
-			let y = Math.floor(conf.size[1]-lineConf.singleHeight*i-spaceLeft[2])
-			
-            svg[++svgI] = '<line x1="'+(spaceLeft[0]-5)+'" y1="'+y+'" x2="'+(spaceLeft[1]-5)+'" y2="'+y+'" stroke="black" stroke-width="0.5" stroke-opacity:"0.5" />'	//axis height line
-			svg[++svgI] = '<text text-anchor="end" dy=".3em" x="'+(spaceLeft[0]-8)+'" y="'+y+'">'+i+'</text>'	//left axis text
+            let y = Math.floor(conf.size[1]-lineConf.singleHeight*i-spaceLeft[2])
+            
+            svg[++svgI] = '<line x1="'+(spaceLeft[0]-5)+'" y1="'+y+'" x2="'+(spaceLeft[1]-5)+'" y2="'+y+'" stroke="black" stroke-width="0.5" stroke-opacity:"0.5" />'    //axis height line
+            svg[++svgI] = '<text text-anchor="end" dy=".3em" x="'+(spaceLeft[0]-8)+'" y="'+y+'">'+i+'</text>'    //left axis text
         }
     }
     
