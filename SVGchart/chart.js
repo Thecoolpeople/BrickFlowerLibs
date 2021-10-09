@@ -30,7 +30,7 @@ BF.svg.chart.bar = function(config, data){
     let maxHeight = conf.maxHeight?conf.maxHeight:(nrData>0?Math.max(...(data.map(d=>Math.max(...d)))):0)
     let spaceLeft = [0, conf.size[0], 0, conf.size[1]]
 
-    let svg = ['<svg width="'+conf.size[0]+'" height="'+conf.size[1]+'">']
+    let svg = ['<svg xmlns="http://www.w3.org/2000/svg" width="'+conf.size[0]+'" height="'+conf.size[1]+'">']
     let svgI = 0
     
     //draw axis
@@ -64,8 +64,8 @@ BF.svg.chart.bar = function(config, data){
         for(let i = 0; i <= maxHeight; i+=conf.gridStep){
             let y = Math.floor(conf.size[1]-barConf.singleHeight*i-spaceLeft[2])
             
-            svg[++svgI] = '<line x1="'+(spaceLeft[0]-5)+'" y1="'+y+'" x2="'+(spaceLeft[1]-5)+'" y2="'+y+'" stroke="black" stroke-width="0.5" stroke-opacity:"0.5" />'    //axis height line
-            svg[++svgI] += '<text text-anchor="end" dy=".3em" x="'+(spaceLeft[0]-8)+'" y="'+y+'">'+i+'</text>'    //left axis text
+            svg[++svgI] = '<line x1="'+(spaceLeft[0]-5)+'" y1="'+y+'" x2="'+(spaceLeft[1]-5)+'" y2="'+y+'" stroke="black" stroke-width="0.5" style="opacity:0.5;" />'    //axis height line
+            svg[++svgI] = '<text text-anchor="end" dy=".3em" x="'+(spaceLeft[0]-8)+'" y="'+y+'">'+i+'</text>'    //left axis text
         }
     }
     return svg.join("")+'</svg>'
@@ -81,7 +81,7 @@ BF.svg.chart.pie = function(config, data){
     let r = Math.floor(Math.min(...conf.size)/2)
     let cx = conf.size[0]/2
     let cy = conf.size[1]/2
-    let svg = ['<svg width="'+conf.size[0]+'" height="'+conf.size[1]+'">']
+    let svg = ['<svg xmlns="http://www.w3.org/2000/svg" width="'+conf.size[0]+'" height="'+conf.size[1]+'">']
     let svgI = 0
 
     let polarToCartesian = function(centerX, centerY, radius, angleInDegrees) {
@@ -130,7 +130,7 @@ BF.svg.chart.line = function(config, data){
     let maxHeight = conf.maxHeight?conf.maxHeight:(nrData>0?Math.max(...(data.map(d=>Math.max(...d)))):0)
     let spaceLeft = [0, conf.size[0], 0, conf.size[1]]
 
-    let svg = ['<svg width="'+conf.size[0]+'" height="'+conf.size[1]+'">']
+    let svg = ['<svg xmlns="http://www.w3.org/2000/svg" width="'+conf.size[0]+'" height="'+conf.size[1]+'">']
     let svgI = 0
     
     //draw axis
@@ -169,7 +169,7 @@ BF.svg.chart.line = function(config, data){
         for(let i = 0; i <= maxHeight; i+=conf.gridStep){
             let y = Math.floor(conf.size[1]-lineConf.singleHeight*i-spaceLeft[2])
             
-            svg[++svgI] = '<line x1="'+(spaceLeft[0]-5)+'" y1="'+y+'" x2="'+(spaceLeft[1]-5)+'" y2="'+y+'" stroke="black" stroke-width="0.5" stroke-opacity:"0.5" />'    //axis height line
+            svg[++svgI] = '<line x1="'+(spaceLeft[0]-5)+'" y1="'+y+'" x2="'+(spaceLeft[1]-5)+'" y2="'+y+'" stroke="black" stroke-width="0.5" style="opacity:0.5;" />'    //axis height line
             svg[++svgI] = '<text text-anchor="end" dy=".3em" x="'+(spaceLeft[0]-8)+'" y="'+y+'">'+i+'</text>'    //left axis text
         }
     }

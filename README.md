@@ -14,7 +14,7 @@ All the SVG libraries:
 ## ToDo
 - browserdb: basically everything
 - osgui: windows
-- svg.mindmap: static: different sizes of text in Nodes, dynamic: all
+- svg.mindmap: dynamic: all
 
 ## Contribution
 Just fork, edit and create a pull request

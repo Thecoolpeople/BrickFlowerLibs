@@ -12,56 +12,110 @@
 <body>
     <h1>TESTING</h1>
     <h2>Bar chart</h2>
-    <div id="bar" style="border: 1px solid black;"></div>
+    <table border="1">
+        <tr>
+            <td><img id="svgChartImageB1"/></td>
+            <td><button onclick="update('B1')">Update</button><br>
+                <textarea id="svgChartTAB1" rows="10" cols="60"></textarea></td>
+        </tr>
+        <tr>
+            <td><img id="svgChartImageB2"/></td>
+            <td><button onclick="update('B2')">Update</button><br>
+                <textarea id="svgChartTAB2" rows="10" cols="60"></textarea></td>
+        </tr>
+    </table>
     <h2>Pie chart</h2>
-    <div id="pie" style="border: 1px solid black;"></div>
+    <table border="1">
+        <tr>
+            <td><img id="svgChartImageP1"/></td>
+            <td><button onclick="update('P1')">Update</button><br>
+                <textarea id="svgChartTAP1" rows="10" cols="60"></textarea></td>
+        </tr>
+        <tr>
+            <td><img id="svgChartImageP2"/></td>
+            <td><button onclick="update('P2')">Update</button><br>
+                <textarea id="svgChartTAP2" rows="10" cols="60"></textarea></td>
+        </tr>
+    </table>
     <h2>Line chart</h2>
-    <div id="line" style="border: 1px solid black;"></div>
+    <table border="1">
+        <tr>
+            <td><img id="svgChartImageL1"/></td>
+            <td><button onclick="update('L1')">Update</button><br>
+                <textarea id="svgChartTAL1" rows="10" cols="60"></textarea></td>
+        </tr>
+        <tr>
+            <td><img id="svgChartImageL2"/></td>
+            <td><button onclick="update('L2')">Update</button><br>
+                <textarea id="svgChartTAL2" rows="10" cols="60"></textarea></td>
+        </tr>
+    </table>
 </body>
 <script>
-window.onload = function(){
-    let svgBar = BF.svg.chart.bar({
-        size: [500, 500],
-        grid:true, gridStep:0.5,
-        axis: true,
-        maxHeight: 6,
-    }, [
-        [1,2,3,4],
-        [2,5,2,1],
-        [4,3,2,1],
-    ])
-    document.getElementById("bar").innerHTML = svgBar
-    
-    let svgPie = BF.svg.chart.pie({
-        size: [500, 500],
-    }, [30, 15, 40, 15])
-    svgPie += BF.svg.chart.pie({
-        size: [500, 500],
-    }, [100])
-    document.getElementById("pie").innerHTML = svgPie
+document.getElementById("svgChartTAB1").value = `{
+    size: [300, 300],
+    grid:true, gridStep:0.5,
+    axis: true,
+    maxHeight: 6,
+}, [
+    [1,2,3,4],
+    [2,5,2,1],
+    [4,3,2,1],
+]`
+document.getElementById("svgChartTAB2").value = `{
+    size: [300, 300],
+    grid:true,
+    axis: true,
+}, [
+    [1,2,3,4],
+    [2,5,2,10],
+    [4,3,2,1],
+]`
+document.getElementById("svgChartTAP1").value = `{
+    size: [300, 300],
+}, [30, 15, 40, 15]`
+document.getElementById("svgChartTAP2").value = `{
+    size: [300, 300],
+}, [100]`
+document.getElementById("svgChartTAL1").value = `{
+    size: [300, 300],
+    grid:true, gridStep:1,
+    axis: true,
+    maxHeight: 6,
+}, [
+    [1,2,3,4],
+    [2,5,2,1],
+    [4,3,2,2],
+]`
+document.getElementById("svgChartTAL2").value = `{
+    size: [300, 300],
+    grid:true, gridStep:1,
+    axis: true,
+    maxHeight: 6,
+    mode:"bezier",
+}, [
+    [1,2,3,4],
+    [2,5,2,1],
+    [4,3,2,2],
+]`
 
-    let svgLine = BF.svg.chart.line({
-        size: [500, 500],
-        grid:true, gridStep:1,
-        axis: true,
-        maxHeight: 6,
-    }, [
-        [1,2,3,4],
-        [2,5,2,1],
-        [4,3,2,2],
-    ])
-    svgLine += BF.svg.chart.line({
-        size: [500, 500],
-        grid:true, gridStep:1,
-        axis: true,
-        maxHeight: 6,
-        mode:"bezier",
-    }, [
-        [1,2,3,4],
-        [2,5,2,1],
-        [4,3,2,2],
-    ])
-    document.getElementById("line").innerHTML = svgLine
+update = function(nr){
+    let f = ""
+    switch(nr.charAt(0)){
+        case 'B': f = "BF.svg.chart.bar"; break;
+        case 'P': f = "BF.svg.chart.pie"; break;
+        case 'L': f = "BF.svg.chart.line"; break;
+    }
+    let svg = eval(f+"("+document.getElementById("svgChartTA"+nr).value+")")
+    document.getElementById("svgChartImage"+nr).src = "data:image/svg+xml;base64,"+btoa(svg)
 }
+
+update("B1")
+update("B2")
+update("P1")
+update("P2")
+update("L1")
+update("L2")
+    
 </script>
 </html>
