@@ -100,7 +100,7 @@ BF.svg.mindmap = function(config, data){
         }
 
         let textLines = calcTextLines(data[0].title, data[0].size?data[0].size:conf.boxTextPx)
-        positions = [...positionsLeft, [[0, textLines, textLines.length*(data[0].size?data[0].size:conf.boxTextPx)]], ...positionsRight]
+        positions = [...(positionsLeft.reverse()), [[0, textLines, textLines.length*(data[0].size?data[0].size:conf.boxTextPx)]], ...positionsRight]
         maxHeight = Math.max(...positions.map(e=>e.length), 0)
         maxHeightLinesPx = Math.max(...positions.map(e=>{return e.map(ee=>ee[2]).reduce((a,b)=>a+b)}))
     }
@@ -135,7 +135,11 @@ BF.svg.mindmap = function(config, data){
     for(let id = 0; id < nrData; id++){
         if(data[id].sub && data[id].sub.length != 0){
             for(let s = 0; s < data[id].sub.length; s++){
-                svg[++svgI] = drawLine([positionsXY[id][0]+positionsXY[id][2], positionsXY[id][1]+positionsXY[id][3]/2], [positionsXY[data[id].sub[s]][0], positionsXY[data[id].sub[s]][1]+positionsXY[data[id].sub[s]][3]/2], conf.color.line)
+                //check positions
+                if(positionsXY[id][0] < positionsXY[data[id].sub[s]][0])    //right arm
+                    svg[++svgI] = drawLine([positionsXY[id][0]+positionsXY[id][2], positionsXY[id][1]+positionsXY[id][3]/2], [positionsXY[data[id].sub[s]][0], positionsXY[data[id].sub[s]][1]+positionsXY[data[id].sub[s]][3]/2], conf.color.line)
+                if(positionsXY[id][0] > positionsXY[data[id].sub[s]][0])    //left arm
+                    svg[++svgI] = drawLine([positionsXY[id][0], positionsXY[id][1]+positionsXY[id][3]/2], [positionsXY[data[id].sub[s]][0]+positionsXY[data[id].sub[s]][2], positionsXY[data[id].sub[s]][1]+positionsXY[data[id].sub[s]][3]/2], conf.color.line)
             }
         }
     }

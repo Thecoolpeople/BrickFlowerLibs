@@ -23,6 +23,11 @@
             <td><button onclick="update(2)">Update</button><br>
                 <textarea id="svgMindmapTA2" rows="10" cols="60"></textarea></td>
         </tr>
+        <tr>
+            <td><img id="svgMindmapImage3"/></td>
+            <td><button onclick="update(3)">Update</button><br>
+                <textarea id="svgMindmapTA3" rows="10" cols="60"></textarea></td>
+        </tr>
     </table>
     <h2>Mindmap Dynamic</h2>
 </body>
@@ -37,6 +42,16 @@
     {title:"SUB1\\nNr: 1", size:10}
 ]`
 document.getElementById("svgMindmapTA2").value = `{
+    size: [500, 200]
+},[
+    //{title:'bla', color:{back, text, border}, sub:[], size:16}  //size is in px
+    {title:"ROOT", sub:[1,2], pos:['left', 'right'], size:32},
+    {title:"SUB1", sub:[3,4]},
+    {title:"SUB2\\nThe best sub"},
+    {title:"SUB1\\nNr: 1", size:10},
+    {title:"SUB1\\nNr: 2", size:10},
+]`
+document.getElementById("svgMindmapTA3").value = `{
     size: [500, 200],
     color:{
         text:"black",
@@ -59,6 +74,7 @@ update = function(nr){
 
 update(1)
 update(2)
+update(3)
 
 </script>
 </html>
