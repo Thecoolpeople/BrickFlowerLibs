@@ -17,14 +17,16 @@ BF.svg.mindmap = function(config, data){
         boxLength: 100,
         boxDistance: [30,16],
         boxTextPx: 16,
-        color:{
-            text:"black",
-            border:"black",
-            back:"transparent",
-            line:"black"
-        },
+
+        colorText:"black",
+        colorBorder:"black",
+        colorBack:"transparent",
+        colorLine:"black",
 
         mode: 'static',     //modes are 'static' and 'dynamic'
+        dynamicOnclick: function(nodeID){},
+        dynamicOndrag: function(nodeID, parentID){},
+
         font: 'New Times Roman,serif',  //default svg font
         charNumber16px: BF.svg.mindmapDefaultCharArray,
         charLength16px: [11.55,10.67,10.67,11.55,9.77,8.90,11.55,11.55,5.33,6.23,11.55,9.77,14.23,11.55,11.55,8.90,11.55,10.67,8.90,9.77,11.55,11.55,15.10,11.55,11.55,9.77,7.10,8.00,7.10,8.00,7.10,5.33,8.00,8.00,4.45,4.45,8.00,4.45,12.45,8.00,8.00,8.00,8.00,5.33,6.23,4.45,8.00,8.00,11.55,8.00,8.00,7.10,11.55,7.10,11.55,8.00,11.55,8.00,8.00,8.00,8.00,8.00,8.00,8.00,8.00,8.00,8.00,8.00,8.00,4.00,4.00,4.45,4.45,7.10,5.33,8.00,8.00,4.45,4.00,8.00]
@@ -51,19 +53,20 @@ BF.svg.mindmap = function(config, data){
     let calcTextLines = function(str, size){
         let text = []
         let textI = -1
+        let emptySize = calcedTextLength(" ", size)
         str.split("\n").forEach(s=>{
             textI++
             text[textI] = ""
             let lineLength = 0
 
             s.split(" ").forEach(word=>{
-                lineLength += calcedTextLength(word, size)
+                lineLength += calcedTextLength(word, size) + emptySize
                 if(lineLength <= conf.boxLength){
                     text[textI] += word + " "
                 }else{
                     textI++
-                    lineLength = 0
-                    text[textI] = word
+                    lineLength = calcedTextLength(word, size) + emptySize
+                    text[textI] = word + " "
                 }
             })
         })
@@ -107,8 +110,12 @@ BF.svg.mindmap = function(config, data){
     //console.log(positions, positions.length, maxHeight, maxHeightLinesPx)
     
     let x = positions.length
-    let svg = ['<svg xmlns="http://www.w3.org/2000/svg" font-family="'+conf.font+'" width="'+(conf.size[0]==-1?x*(conf.boxLength+conf.boxDistance[0]):conf.size[0])+'" height="'+(conf.size[1]==-1?(maxHeightLinesPx+maxHeight*conf.boxDistance[1]):conf.size[1])+'" viewBox="0 0 '+x*(conf.boxLength+conf.boxDistance[0])+' '+(maxHeightLinesPx+maxHeight*conf.boxDistance[1])+'">']
-    let svgI = 0
+    let svg = [ '<svg xmlns="http://www.w3.org/2000/svg" font-family="'+conf.font+'" ',
+                'width="'+(conf.size[0]==-1?x*(conf.boxLength+conf.boxDistance[0]):conf.size[0])+'" height="'+(conf.size[1]==-1?(maxHeightLinesPx+maxHeight*conf.boxDistance[1]):conf.size[1])+'" ',
+                'viewBox="0 0 '+x*(conf.boxLength+conf.boxDistance[0])+' '+(maxHeightLinesPx+maxHeight*conf.boxDistance[1])+'" ',
+                conf.mode=='dynamic'?'onclick="BF.svg.mindmapMakeDragable(evt)" ':'',
+                '>']
+    let svgI = svg.length-1
 
     //draw nodes
     positions.forEach((columE,colum)=>{    //foreach column
@@ -120,10 +127,11 @@ BF.svg.mindmap = function(config, data){
             let lines = nodeE[1].length
             positionsXY[nodeE[0]] = [x, y, conf.boxLength, nodeE[2]+2]
 
-            svg[++svgI] = '<rect x="'+x+'" y="'+y+'" width="'+positionsXY[nodeE[0]][2]+'" height="'+positionsXY[nodeE[0]][3]+'" style="fill:'+(data[nodeE[0]].color&&data[nodeE[0]].color.back?data[nodeE[0]].color.back:conf.color.back)+';stroke-width:1px;stroke:'+(data[nodeE[0]].color&&data[nodeE[0]].color.border?data[nodeE[0]].color.border:conf.color.border)+';"></rect>'
+            svg[++svgI] = '<g transform="translate('+x+','+y+')"><rect width="'+positionsXY[nodeE[0]][2]+'" height="'+positionsXY[nodeE[0]][3]+'" style="fill:'+(data[nodeE[0]].colorBack?data[nodeE[0]].colorBack:conf.colorBack)+';stroke-width:1px;stroke:'+(data[nodeE[0]].colorBorder?data[nodeE[0]].colorBorder:conf.colorBorder)+';"></rect>'
             nodeE[1].forEach((t,line)=>{
-                svg[++svgI] = '<text x="'+x+'" y="'+(y+(data[nodeE[0]].size?data[nodeE[0]].size:conf.boxTextPx)*(line+1))+'" font-size="'+(data[nodeE[0]].size?data[nodeE[0]].size:conf.boxTextPx)+'" style="fill:'+(data[nodeE[0]].color&&data[nodeE[0]].color.text?data[nodeE[0]].color.text:conf.color.text)+'">'+t+'</text>'
+                svg[++svgI] = '<text y="'+((data[nodeE[0]].size?data[nodeE[0]].size:conf.boxTextPx)*(line+1))+'" font-size="'+(data[nodeE[0]].size?data[nodeE[0]].size:conf.boxTextPx)+'" style="fill:'+(data[nodeE[0]].colorText?data[nodeE[0]].colorText:conf.colorText)+'">'+t+'</text>'
             })
+            svg[++svgI] = '</g>'
             y += conf.boxTextPx*lines+conf.boxDistance[1]
         })
     })
@@ -137,20 +145,26 @@ BF.svg.mindmap = function(config, data){
             for(let s = 0; s < data[id].sub.length; s++){
                 //check positions
                 if(positionsXY[id][0] < positionsXY[data[id].sub[s]][0])    //right arm
-                    svg[++svgI] = drawLine([positionsXY[id][0]+positionsXY[id][2], positionsXY[id][1]+positionsXY[id][3]/2], [positionsXY[data[id].sub[s]][0], positionsXY[data[id].sub[s]][1]+positionsXY[data[id].sub[s]][3]/2], conf.color.line)
+                    svg[++svgI] = drawLine([positionsXY[id][0]+positionsXY[id][2], positionsXY[id][1]+positionsXY[id][3]/2], [positionsXY[data[id].sub[s]][0], positionsXY[data[id].sub[s]][1]+positionsXY[data[id].sub[s]][3]/2], conf.colorLine)
                 if(positionsXY[id][0] > positionsXY[data[id].sub[s]][0])    //left arm
-                    svg[++svgI] = drawLine([positionsXY[id][0], positionsXY[id][1]+positionsXY[id][3]/2], [positionsXY[data[id].sub[s]][0]+positionsXY[data[id].sub[s]][2], positionsXY[data[id].sub[s]][1]+positionsXY[data[id].sub[s]][3]/2], conf.color.line)
+                    svg[++svgI] = drawLine([positionsXY[id][0], positionsXY[id][1]+positionsXY[id][3]/2], [positionsXY[data[id].sub[s]][0]+positionsXY[data[id].sub[s]][2], positionsXY[data[id].sub[s]][1]+positionsXY[data[id].sub[s]][3]/2], conf.colorLine)
             }
         }
     }
     
-    
     return svg.join("")+'</svg>'
+}
+BF.svg.mindmapMakeDragable = function(evt){
+    if(["text", "rect"].includes(evt.target.tagName)){
+        console.log("Group", evt.target.parentElement)
+        //change texts into textbox
+        
+    }
 }
 
 BF.svg.mindmapDefaultCharArray = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','Ä','ä','Ö','ö','Ü','ü','ß','0','1','2','3','4','5','6','7','8','9','.',',',';',':','?','!','#','*','/',' ', '_']
 
-BF.svg.mindmapCalcCharLength = function(charArray, font="", fontSize="16px"){
+BF.svg.mindmapCalcCharLength = function(charArray, font="New Times Roman,serif", fontSize="16px"){
     let result = []
     let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg")
     svg.style.opacity = 0

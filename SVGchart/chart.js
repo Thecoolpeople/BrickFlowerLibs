@@ -18,7 +18,7 @@ BF.svg.chart.bar = function(config, data){
         distance: [2, 8], //[bar distance, additional between groups]
         colors: ["blue", "green", "red", "grey", "orange"],
         maxHeight: false,
-
+        minHeight: false,
         
         axis: false,
         grid: false,
@@ -28,6 +28,7 @@ BF.svg.chart.bar = function(config, data){
     let nrData = data.length
     let maxLength = nrData>0?Math.max(...(data.map(d=>d.length))):0
     let maxHeight = conf.maxHeight?conf.maxHeight:(nrData>0?Math.max(...(data.map(d=>Math.max(...d)))):0)
+    let minHeight = conf.minHeight?conf.minHeight:(nrData>0?Math.min(...(data.map(d=>Math.min(...d)))):0)
     let spaceLeft = [0, conf.size[0], 0, conf.size[1]]
 
     let svg = ['<svg xmlns="http://www.w3.org/2000/svg" width="'+conf.size[0]+'" height="'+conf.size[1]+'">']
@@ -43,11 +44,15 @@ BF.svg.chart.bar = function(config, data){
 
     //draw bars
     let drawBar = function(conf, x, y, height, color){
-        return '<rect x="'+x+'" y="'+(y-height*conf.singleHeight)+'" width="'+conf.width+'" height="'+height*conf.singleHeight+'" style="fill:'+color+';"/>'  //;stroke-width:3;stroke:rgb(0,0,0)
+        if(height >= 0)
+            return '<rect x="'+x+'" y="'+(y-height*conf.singleHeight+conf.zeroHeight)+'" width="'+conf.width+'" height="'+(height-(minHeight>0?minHeight:0))*conf.singleHeight+'" style="fill:'+color+';"/>'
+        else
+            return '<rect x="'+x+'" y="'+(y+conf.zeroHeight)+'" width="'+conf.width+'" height="'+(-height)*conf.singleHeight+'" style="fill:'+color+';"/>'
     }
     let barConf = {
         width: (spaceLeft[1] - spaceLeft[0] - nrData*maxLength*conf.distance[0] - (nrData>1?maxLength*conf.distance[1]:0)) / (nrData*maxLength),
-        singleHeight: (spaceLeft[3]-spaceLeft[2]) / maxHeight
+        singleHeight: (spaceLeft[3]-spaceLeft[2]) / (maxHeight-minHeight),
+        zeroHeight: (spaceLeft[3]-spaceLeft[2]) / (maxHeight-minHeight)*minHeight,
     }
 
     let y = conf.size[0]-spaceLeft[2]
@@ -61,11 +66,11 @@ BF.svg.chart.bar = function(config, data){
 
     //draw grid
     if(conf.grid){
-        for(let i = 0; i <= maxHeight; i+=conf.gridStep){
+        for(let i = 0; i <= maxHeight-minHeight; i+=conf.gridStep){
             let y = Math.floor(conf.size[1]-barConf.singleHeight*i-spaceLeft[2])
             
             svg[++svgI] = '<line x1="'+(spaceLeft[0]-5)+'" y1="'+y+'" x2="'+(spaceLeft[1]-5)+'" y2="'+y+'" stroke="black" stroke-width="0.5" style="opacity:0.5;" />'    //axis height line
-            svg[++svgI] = '<text text-anchor="end" dy=".3em" x="'+(spaceLeft[0]-8)+'" y="'+y+'">'+i+'</text>'    //left axis text
+            svg[++svgI] = '<text text-anchor="end" dy=".3em" x="'+(spaceLeft[0]-8)+'" y="'+y+'">'+(i+minHeight)+'</text>'    //left axis text
         }
     }
     return svg.join("")+'</svg>'
@@ -109,7 +114,7 @@ BF.svg.chart.pie = function(config, data){
             "L", cx, cy,
             "L", start.x, start.y,
         ]
-        svg[++svgI] = '<path d="'+p.join(" ")+'"  fill="'+conf.colors[di]+'"/>'
+        svg[++svgI] = '<path d="'+p.join(" ")+'"  fill="'+conf.colors[di % conf.colors.length]+'"/>'
     }
     return svg.join("")+'</svg>'
 }
@@ -118,6 +123,9 @@ BF.svg.chart.line = function(config, data){
     let conf = Object.assign({
         size: [400, 400],  //width, height
         colors: ["blue", "green", "red", "grey", "orange"],
+        maxHeight: false,
+        minHeight: false,
+
         mode: "direct", //other: smooth
 
         axis: false,
@@ -128,6 +136,7 @@ BF.svg.chart.line = function(config, data){
     let nrData = data.length
     let maxLength = nrData>0?Math.max(...(data.map(d=>d.length))):0
     let maxHeight = conf.maxHeight?conf.maxHeight:(nrData>0?Math.max(...(data.map(d=>Math.max(...d)))):0)
+    let minHeight = conf.minHeight?conf.minHeight:(nrData>0?Math.min(...(data.map(d=>Math.min(...d)))):0)
     let spaceLeft = [0, conf.size[0], 0, conf.size[1]]
 
     let svg = ['<svg xmlns="http://www.w3.org/2000/svg" width="'+conf.size[0]+'" height="'+conf.size[1]+'">']
@@ -143,15 +152,16 @@ BF.svg.chart.line = function(config, data){
 
     let lineConf = {
         width: (spaceLeft[1] - spaceLeft[0]) / (maxLength-1),
-        singleHeight: (spaceLeft[3]-spaceLeft[2]) / maxHeight
+        singleHeight: (spaceLeft[3]-spaceLeft[2]) / (maxHeight-minHeight),
+        zeroHeight: (spaceLeft[3]-spaceLeft[2]) / (maxHeight-minHeight)*minHeight,
     }
 
     //draw lines
     for(di in data){
-        let p = ["M", spaceLeft[0], Math.floor(conf.size[1]-lineConf.singleHeight*data[di][0]-spaceLeft[2])]
+        let p = ["M", spaceLeft[0], Math.floor(conf.size[1]-lineConf.singleHeight*data[di][0]-spaceLeft[2]+lineConf.zeroHeight)]
         for(let ei=1; ei < data[di].length; ei++){
             let px = spaceLeft[0]+lineConf.width*ei
-            let py = Math.floor(conf.size[1]-lineConf.singleHeight*data[di][ei]-spaceLeft[2])
+            let py = Math.floor(conf.size[1]-lineConf.singleHeight*data[di][ei]-spaceLeft[2]+lineConf.zeroHeight)
             if(conf.mode == "direct"){
                 p[p.length] = "L "+px+" "+py
             }else if(conf.mode == "bezier"){
@@ -160,17 +170,17 @@ BF.svg.chart.line = function(config, data){
                 if(ei+1 < data[di].length) p[p.length] = ","
             }
         }
-        svg[++svgI] = '<path d="'+p.join(" ")+'" fill="none" stroke-width="3" stroke="'+conf.colors[di]+'"/>'
+        svg[++svgI] = '<path d="'+p.join(" ")+'" fill="none" stroke-width="3" stroke="'+conf.colors[di % conf.colors.length]+'"/>'
     }
 
 
     //draw grid
     if(conf.grid){
-        for(let i = 0; i <= maxHeight; i+=conf.gridStep){
+        for(let i = 0; i <= (maxHeight-minHeight); i+=conf.gridStep){
             let y = Math.floor(conf.size[1]-lineConf.singleHeight*i-spaceLeft[2])
             
             svg[++svgI] = '<line x1="'+(spaceLeft[0]-5)+'" y1="'+y+'" x2="'+(spaceLeft[1]-5)+'" y2="'+y+'" stroke="black" stroke-width="0.5" style="opacity:0.5;" />'    //axis height line
-            svg[++svgI] = '<text text-anchor="end" dy=".3em" x="'+(spaceLeft[0]-8)+'" y="'+y+'">'+i+'</text>'    //left axis text
+            svg[++svgI] = '<text text-anchor="end" dy=".3em" x="'+(spaceLeft[0]-8)+'" y="'+y+'">'+(i+minHeight)+'</text>'    //left axis text
         }
     }
     
