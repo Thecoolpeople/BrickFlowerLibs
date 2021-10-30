@@ -11,11 +11,32 @@
 </head>
 <body>
     <h1>TESTING</h1>
-    
+    <h2>List of all stores</h2>
+        <div id="stores"></div>
+    <h2>Edit Stores</h2>
+        <input type="text" id="storeName"></input>
+        <button onclick="editStore('create')">create</button>
+        <button onclick="editStore('delete')">delete</button>
+    <h2>Insert into Stores</h2>
+        
 </body>
 <script>
-window.onload = function(){
-    BDB = BF.browserdb("test", 1)
+reload = function(){
+    //display all stores
+    document.getElementById("stores").innerText = BDB.getStores().join(", ")
+}
+window.onload = async function(){
+    BDB = new BF.browserdb("test", 1)
+    await BDB.init()
+    reload()
+}
+editStore = async function(m){
+    store = document.getElementById("storeName").value
+    if(m == "create")
+        await BDB.createStore(store)
+    else if(m == "delete")
+        await BDB.deleteStore(store)
+    reload()
 }
 </script>
 </html>

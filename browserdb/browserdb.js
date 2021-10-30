@@ -9,68 +9,136 @@
 a good handler for using the browser internal database, uses IndexedDB internally
 */
 
-BF.browserdb = async function(key, version){
+BF.browserdb = function(key, version){
+    let T = this
     //init
-    this.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB
-    this.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction
-    this.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange
+    T.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB
+    T.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction
+    T.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange
 
-    if (!this.indexedDB) {
-        console.alert("Your browser does not support a stable version of IndexedDB.")
+    if (!T.indexedDB) {
+        console.error("Your browser does not support a stable version of IndexedDB.")
         return false
     }
 
-    //open db connection
-    let db = await new Promise(function(resolve, reject){
-        var request = this.indexedDB.open(key, version)
-
-        //db handler
-        request.onerror = function(event) {
-            alert("Warum haben Sie meiner Webapp nicht erlaubt IndexedDB zu verwenden?!");
-            reject(event)
-        };
-        request.onsuccess = function(event) {
-            let database = request.result;
-            resolve(database)
-        };
-    })
-
     //internal function
-    this.internal = {
+    let internal = {
         /**
+         * open the db connection
+         * @param {string} key The name of the DB
+         * @param {string/integer} The version of the DB (can be empty if you wannot upgrade the db)
+         * @param {function} onupgrade The function with (event, db) as parameter if you want to use spezific function which should be called at upgrade
+         */
+        openDB: async function(key, version, onupgrade){
+            if(T.db) T.db.close()
+            T.db = await new Promise(function(resolve, reject){
+                let request = T.indexedDB.open(key, version)
+
+                //db handler
+                request.onerror = function(event) {
+                    alert("Not allowed to use IndexedDB!");
+                    reject(event)
+                };
+                request.onsuccess = function(event) {
+                    let database = request.result;
+                    resolve(database)
+                };
+                request.onupgradeneeded = function(event){
+                    onupgrade?onupgrade(event, request.result):""
+                }
+            })
+        },
+        /**
+         * create a full ObjectStore in the DB and update the version automatically
+         * @param {string} store_name
+         * @param {object} options The options for creating the store
+         */
+        createObjectStore: async function(store_name, options = {keyPath: 'id', autoIncrement: true}){
+            let version = T.db.version + 1
+            await this.openDB(key, version, function(event, db){
+                db.createObjectStore(store_name, options);
+            })
+        },
+        /**
+         * delete a full ObjectStore in the DB and update the version automatically
+         * @param {string} store_name
+         */
+        deleteObjectStore: async function(store_name){
+            let version = T.db.version + 1
+            await this.openDB(key, version, function(event, db){
+                db.deleteObjectStore(store_name);
+            })
+        },
+        /**
+         * get the Object store for insert / delete / ...
          * @param {string} store_name
          * @param {string} mode either "readonly" or "readwrite"
+         * @return {IDBObjectStore} the store itself
          */
         getObjectStore: function(store_name, mode) {
-            var tx = db.transaction(store_name, mode);
+            var tx = T.db.transaction(store_name, mode);
             return tx.objectStore(store_name);
         },
-
         /**
-         * 
+         * clear the whole Object store
+         * @param {string} store_name
          */
-        clearObjectStore: function(store_name) {
-            var store = getObjectStore(DB_STORE_NAME, 'readwrite');
-            var req = store.clear();
-            req.onsuccess = function(evt) {
-                displayActionSuccess("Store cleared");
-                displayPubList(store);
-            };
-            req.onerror = function (evt) {
-                console.error("clearObjectStore:", evt.target.errorCode);
-                displayActionFailure(this.error);
-            };
+        clearObjectStore: async function(store_name){
+            let store = this.getObjectStore(store_name, 'readwrite');
+            return await new Promise(function(resolve, reject){
+                let reqest = store.clear();
+                reqest.onsuccess = function(event) {
+                    resolve(true)
+                };
+                reqest.onerror = function (event) {
+                    reject(event)
+                };
+            })
         },
+    }
+    
+    T.init = async function(){
+        await internal.openDB(key)
+        console.log(T.db)
     }
 
     //user funcs
-    
-    this.createStore = function(storeName){
-        db.createObjectStore(storeName, {autoIncrement: true})
+    T.getStores = function(){
+        return [...T.db.objectStoreNames]
+    }
+    T.createStore = async function(storeName, options){
+        return internal.createObjectStore(storeName, options)
+    }
+    T.deleteStore = async function(storeName){
+        return internal.deleteObjectStore(storeName)
+    }
+    T.clearObjectStore = async function(storeName){
+        return internal.clearObjectStore(storeName)
     }
 
-    this.addEntry = function(storeName, name){
-        let store = this.internal.getObjectStore(storeName, "readwrite")
-        store.add()
+    T.addEntry = function(storeName, item){
+        let store = internal.getObjectStore(storeName, "readwrite")
+        store.add(item)
     }
+    T.deleteEntry = function(storeName){
+        //TODO
+    }
+    T.getAll = async function(storeName, option, count){
+        return new Promise(function(resolve, reject){
+            let store = internal.getObjectStore(storeName, "readwrite")
+            let request = store.getAll(option, count)
+            
+            //db handler
+            request.onerror = function(event) {
+                alert("Not allowed to use IndexedDB->ObjectStore->getAll()!");
+                reject(event)
+            };
+            request.onsuccess = function(event) {
+                let entries = request.result;
+                resolve(entries)
+            };
+        })
+    }
+    
+    return this
 }
