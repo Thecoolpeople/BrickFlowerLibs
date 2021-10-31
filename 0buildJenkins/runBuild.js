@@ -51,6 +51,10 @@ for(f of folders){
 }
 
 console.log("start building ALL")
+//unique wholeFiles
+wholeFiles = wholeFiles.map(e=>{return fs.realpathSync(e)})
+wholeFiles = [...new Set(wholeFiles)]
+console.log(wholeFiles.join("\n"))
 let build = buildFiles(wholeFiles)
 fs.writeFileSync("../0build/0build.js", build)
 console.log(build.length)

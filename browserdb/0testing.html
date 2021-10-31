@@ -18,12 +18,25 @@
         <button onclick="editStore('create')">create</button>
         <button onclick="editStore('delete')">delete</button>
     <h2>Insert into Stores</h2>
+        <select id="storeInsert"></select>
+        <input type="text" id="storeInsert2"></input>
+        <button onclick="insertIntoStore()">insert</button>
+    <h2>Show content in Store</h2>
+        <select id="storeShow"></select>
+        <button onclick="storeShow()">show</button><br>
+        <div id="storeShowContent"></div>
         
 </body>
 <script>
 reload = function(){
     //display all stores
-    document.getElementById("stores").innerText = BDB.getStores().join(", ")
+    let storeSelect = BDB.store_getAll().map(e=>{return '<option value="'+e+'">'+e+'</value>'}).join("")
+    document.getElementById("stores").innerText = BDB.store_getAll().join(", ")
+    document.getElementById("storeInsert").innerHTML = storeSelect
+    document.getElementById("storeShow").innerHTML = storeSelect
+
+    
+    storeShow()
 }
 window.onload = async function(){
     BDB = new BF.browserdb("test", 1)
@@ -33,10 +46,25 @@ window.onload = async function(){
 editStore = async function(m){
     store = document.getElementById("storeName").value
     if(m == "create")
-        await BDB.createStore(store)
+        await BDB.store_create(store)
     else if(m == "delete")
-        await BDB.deleteStore(store)
+        await BDB.store_delete(store)
     reload()
+}
+insertIntoStore = async function(){
+    store = document.getElementById("storeInsert").value
+    value = document.getElementById("storeInsert2").value
+    await BDB.entry_add(store, {d:value})
+    reload()
+}
+deletefromStore = async function(store, id){
+    await BDB.entry_delete(store, id)
+    reload()
+}
+storeShow = async function(){
+    store = document.getElementById("storeShow").value
+    content = await BDB.entry_getAll(store)
+    document.getElementById("storeShowContent").innerHTML = content.map(e=>'<button onclick="deletefromStore(\''+store+'\', '+e.id+')">delete</button>'+JSON.stringify(e)).join("<br>")
 }
 </script>
 </html>

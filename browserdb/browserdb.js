@@ -9,7 +9,7 @@
 a good handler for using the browser internal database, uses IndexedDB internally
 */
 
-BF.browserdb = function(key, version){
+BF.browserdb = function(key){
     let T = this
     //init
     T.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB
@@ -103,29 +103,52 @@ BF.browserdb = function(key, version){
     }
 
     //user funcs
-    T.getStores = function(){
+    T.store_getAll = function(){
         return [...T.db.objectStoreNames]
     }
-    T.createStore = async function(storeName, options){
+    T.store_create = async function(storeName, options){
         return internal.createObjectStore(storeName, options)
     }
-    T.deleteStore = async function(storeName){
+    T.store_delete = async function(storeName){
         return internal.deleteObjectStore(storeName)
     }
-    T.clearObjectStore = async function(storeName){
+    T.store_clear = async function(storeName){
         return internal.clearObjectStore(storeName)
     }
 
-    T.addEntry = function(storeName, item){
+    T.entry_add = async function(storeName, item){
         let store = internal.getObjectStore(storeName, "readwrite")
-        store.add(item)
-    }
-    T.deleteEntry = function(storeName){
-        //TODO
-    }
-    T.getAll = async function(storeName, option, count){
         return new Promise(function(resolve, reject){
-            let store = internal.getObjectStore(storeName, "readwrite")
+            let request = store.add(item)
+            //db handler
+            request.onerror = function(event) {
+                alert("Not allowed to use IndexedDB->ObjectStore->add()!");
+                reject(event)
+            };
+            request.onsuccess = function(event) {
+                let entries = request.result;
+                resolve(entries)
+            };
+        })
+    }
+    T.entry_delete = async function(storeName, id){
+        let store = internal.getObjectStore(storeName, "readwrite")
+        return new Promise(function(resolve, reject){
+            let request = store.delete(id)
+            //db handler
+            request.onerror = function(event) {
+                alert("Not allowed to use IndexedDB->ObjectStore->delete()!");
+                reject(event)
+            };
+            request.onsuccess = function(event) {
+                let entries = request.result;
+                resolve(entries)
+            };
+        })
+    }
+    T.entry_getAll = async function(storeName, option, count){
+        let store = internal.getObjectStore(storeName, "readwrite")
+        return new Promise(function(resolve, reject){
             let request = store.getAll(option, count)
             
             //db handler
@@ -139,6 +162,6 @@ BF.browserdb = function(key, version){
             };
         })
     }
-    
+
     return this
 }
