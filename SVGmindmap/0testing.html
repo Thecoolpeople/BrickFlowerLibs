@@ -80,15 +80,19 @@ document.getElementById("svgMindmapTAD1").value = `{
     {title:"SUB1\\nNr: 2", size:10},
 ]`
 
-update = function(nr){
-    let svg = eval("BF.svg.mindmap("+document.getElementById("svgMindmapTA"+nr).value+")")
-    document.getElementById("svgMindmapImage"+nr).innerHTML = svg
+update = function(nr, dynamic){
+    let svg = new BF.svg.mindmap()
+    eval("svg.setData("+document.getElementById("svgMindmapTA"+nr).value+")")
+    if(!dynamic)
+        document.getElementById("svgMindmapImage"+nr).innerHTML = svg.svg()
+    if(dynamic)
+    document.getElementById("svgMindmapImage"+nr).innerHTML = svg.svgDynamic()
 }
 
 update(1)
 update(2)
 update(3)
-update('D1')
+update('D1', true)
 
 </script>
 </html>

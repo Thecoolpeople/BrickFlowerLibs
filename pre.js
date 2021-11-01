@@ -20,6 +20,8 @@ BF.throwError = function(msg){
 
 //Sandbox definition (thanks to https://blog.risingstack.com/writing-a-javascript-framework-sandboxed-code-evaluation/)
 BF.sandboxProxies = new WeakMap()
+//usage run ok: BF.sandbox("console.log('ok')")({console:console})
+//usage run not ok: BF.sandbox("console.log('ok')")({})
 BF.sandbox = function(srcString){
     function has(target, key){
         return true

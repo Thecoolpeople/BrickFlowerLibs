@@ -19,7 +19,7 @@ All the SVG libraries:
 ## ToDo
 - browserdb: virtual FileSystem
 - osgui: windows
-- svg.mindmap: dynamic: all
+- svg.mindmap: dynamic: change settings of nodes
 
 ## Contribution
 Just fork, edit and create a pull request
