@@ -130,11 +130,11 @@ BF.svg.mindmap = function(){
 
             let foreign = document.createElementNS("http://www.w3.org/2000/svg", 'foreignObject')
             foreign.setAttribute("width", GroupElement.children[0].getAttribute("width")+"px")
-            foreign.setAttribute("height", GroupElement.children[0].getAttribute("height")+"px") //TODO dynamic size when editing the div
+            foreign.setAttribute("height", "1000px")
             
             foreign.requiredExtensions = "http://www.w3.org/1999/xhtml"
             let html = '<body xmlns="http://www.w3.org/1999/xhtml">'
-            html += '<div width="100%" height="100%" style="border: 1px solid black;font-size:'+GroupElement.children[1].children[0].getAttribute('font-size')+'px;font-family:'+I.conf.font+'" contenteditable="true">'    //TODO textFont, textSize, editable, ...
+            html += '<div width="100%" style="height:auto;border: 2px solid red;font-size:'+GroupElement.children[1].children[0].getAttribute('font-size')+'px;font-family:'+I.conf.font+'" contenteditable="true">'
             html += text
             html += '</div>'
             html += '</body>'
@@ -174,7 +174,22 @@ BF.svg.mindmap = function(){
             
             T.pt = T.pt.matrixTransform(T.dyn_svg.getScreenCTM().inverse())
             return [Math.floor(T.pt.x), Math.floor(T.pt.y)]
-        }
+        },
+        dynamic_checkIfSubOfNode: function(id, searchNodeID){
+            if(I.data[id].sub){
+                if(I.data[id].sub.includes(searchNodeID)){
+                    return true
+                }else{
+                    let ret = false
+                    for(let i=0; i < I.data[id].sub.length; i++){
+                        ret |= I.dynamic_checkIfSubOfNode(I.data[id].sub[i], searchNodeID)
+                    }
+                    return ret
+                }
+            }
+            return false
+        },
+
     }
 
     T.setData = function(config, data){
@@ -257,16 +272,17 @@ BF.svg.mindmap = function(){
             }
 
             T.isDown = true
-            if(["text", "rect", "div"].includes(event.target.tagName.toLowerCase())){
-                let g = event.target.parentElement
-                let id
+            if(["text", "rect", "div", "g"].includes(event.target.tagName.toLowerCase())){
+                let g = event.target
+                let id = null
                 while(true){
-                    id = parseInt(g.getAttribute("nodeid"))   //get nodeID
-                    if(!id)
+                    id = g.getAttribute("nodeid")   //get nodeID
+                    if(id == null)
                         g = g.parentElement
                     else
                         break
                 }
+                id = parseInt(id)
 
                 if(T.lastID != id){
                     if(T.lastGroup && T.lastGroup.children.length == 3) I.dynamic_change2node(T.lastGroup)      //set textbox back
@@ -289,6 +305,9 @@ BF.svg.mindmap = function(){
         BF.svg.mindmap.func[ID+"_u"] = function(event){
             if(event.type == "pointerout" && event.target.tagName != "svg")
                 return
+            if(event.type == "pointerout" && ["text", "g", "rect"].includes(event.relatedTarget.tagName))
+                return
+            
             T.isDown = false
 
             //if move was done (new parent Node) redraw SVG
@@ -301,19 +320,23 @@ BF.svg.mindmap = function(){
                         index = I.data[i].sub.indexOf(T.lastID)
                     }
                 }
+
+                //check if you does not drag a parent node to its own sub node
                 
-                //delete Reference
-                I.data[oldParent].sub.splice(index, 1)
-                if(oldParent == 0)  //root, position
-                    I.data[oldParent].pos.splice(index, 1)
-                
-                //new reference
-                if(!I.data[T.newParent].sub)
-                    I.data[T.newParent].sub = []
-                I.data[T.newParent].sub[I.data[T.newParent].sub.length] = T.lastID
-                if(T.newParent == 0)  //root, position
-                    I.data[T.newParent].pos[I.data[T.newParent].pos.length] = T.LeftRight
-                
+                if(!I.dynamic_checkIfSubOfNode(T.lastID, T.newParent)){
+                    //delete Reference
+                    I.data[oldParent].sub.splice(index, 1)
+                    if(oldParent == 0)  //root, position
+                        I.data[oldParent].pos.splice(index, 1)
+                    
+                    //new reference
+                    if(!I.data[T.newParent].sub)
+                        I.data[T.newParent].sub = []
+                    I.data[T.newParent].sub[I.data[T.newParent].sub.length] = T.lastID
+                    if(T.newParent == 0)  //root, position
+                        I.data[T.newParent].pos[I.data[T.newParent].pos.length] = T.LeftRight
+                }
+
                 T.newParent = null
                 T.lastID = null
                 T.lastGroup = null
@@ -357,12 +380,16 @@ BF.svg.mindmap = function(){
                     })
                     T.newParent = a.indexOf(Math.min(...a))
 
-                    //display direct line
-                    line.style.setProperty("opacity", "1")
-                    line.setAttribute("x1", x1)
-                    line.setAttribute("y1", y+T.calc[3][id].height/2)
-                    line.setAttribute("x2", T.calc[3][T.newParent].x)
-                    line.setAttribute("y2", T.calc[3][T.newParent].y+T.calc[3][T.newParent].height/2)
+                    if(!I.dynamic_checkIfSubOfNode(T.lastID, T.newParent)){
+                        //display direct line
+                        line.style.setProperty("opacity", "1")
+                        line.setAttribute("x1", x1)
+                        line.setAttribute("y1", y+T.calc[3][id].height/2)
+                        line.setAttribute("x2", T.calc[3][T.newParent].x)
+                        line.setAttribute("y2", T.calc[3][T.newParent].y+T.calc[3][T.newParent].height/2)
+                    }else{
+                        T.newParent = null
+                    }
                 }else if(T.LeftRight == 'right'){
                     //get new parent node
                     let a = T.calc[3].map((e,i)=>{
@@ -372,12 +399,16 @@ BF.svg.mindmap = function(){
                     })
                     T.newParent = a.indexOf(Math.min(...a))
                     
-                    //display direct line
-                    line.style.setProperty("opacity", "1")
-                    line.setAttribute("x1", x)
-                    line.setAttribute("y1", y+T.calc[3][id].height/2)
-                    line.setAttribute("x2", T.calc[3][T.newParent].x+I.conf.boxLength)
-                    line.setAttribute("y2", T.calc[3][T.newParent].y+T.calc[3][T.newParent].height/2)
+                    if(!I.dynamic_checkIfSubOfNode(T.lastID, T.newParent)){
+                        //display direct line
+                        line.style.setProperty("opacity", "1")
+                        line.setAttribute("x1", x)
+                        line.setAttribute("y1", y+T.calc[3][id].height/2)
+                        line.setAttribute("x2", T.calc[3][T.newParent].x+I.conf.boxLength)
+                        line.setAttribute("y2", T.calc[3][T.newParent].y+T.calc[3][T.newParent].height/2)
+                    }else{
+                        T.newParent = null
+                    }
                 }
             }
         }
@@ -405,7 +436,7 @@ BF.svg.mindmap = function(){
                     'onpointerout="BF.svg.mindmap.func[\''+ID+'_u\'](event)" ',
                     'onpointercancel="BF.svg.mindmap.func[\''+ID+'_u\'](event)" ',
                     'onlostpointercapture="BF.svg.mindmap.func[\''+ID+'_u\'](event)" ',
-                    'style="-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;"',
+                    'style="-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;-ms-touch-action: manipulation;touch-action:manipulation;"',
                     '>']
         svg[svg.length] = '<line id="'+ID+'_direct" style="opacity:0" stroke="black" stroke-width="3"/>'
 

@@ -14,17 +14,17 @@
     <h2>Mindmap Static</h2>
     <table border="1">
         <tr>
-            <td><object id="svgMindmapImage1" type="image/svg+xml" height="200" width="500"></td>
+            <td><div id="svgMindmapImage1" type="image/svg+xml" height="200" width="500"></div></td>
             <td><button onclick="update(1)">Update</button><br>
                 <textarea id="svgMindmapTA1" rows="10" cols="60"></textarea></td>
         </tr>
         <tr>
-            <td><object id="svgMindmapImage2" type="image/svg+xml" height="200" width="500"></td>
+            <td><div id="svgMindmapImage2" type="image/svg+xml" height="200" width="500"></div></td>
             <td><button onclick="update(2)">Update</button><br>
                 <textarea id="svgMindmapTA2" rows="10" cols="60"></textarea></td>
         </tr>
         <tr>
-            <td><object id="svgMindmapImage3" type="image/svg+xml" height="200" width="500"></td>
+            <td><div id="svgMindmapImage3" type="image/svg+xml" height="200" width="500"></div></td>
             <td><button onclick="update(3)">Update</button><br>
                 <textarea id="svgMindmapTA3" rows="10" cols="60"></textarea></td>
         </tr>
@@ -33,7 +33,7 @@
     <table border="1">
         <tr>
             <td><div id="svgMindmapImageD1" type="image/svg+xml" height="200" width="500"></div></td>
-            <td><button onclick="update('D1')">Update</button><br>
+            <td><button onclick="update('D1', true)">Update</button><br>
                 <textarea id="svgMindmapTAD1" rows="10" cols="60"></textarea></td>
         </tr>
     </table>
@@ -70,8 +70,7 @@ document.getElementById("svgMindmapTA3").value = `{
 ]`
 
 document.getElementById("svgMindmapTAD1").value = `{
-    size: [500, 200],
-    mode: 'dynamic',
+    size: [500, 200]
 },[
     {title:"ROOT", sub:[1,2], pos:['left', 'right'], size:32},
     {title:"SUB1", sub:[3,4]},
@@ -86,7 +85,7 @@ update = function(nr, dynamic){
     if(!dynamic)
         document.getElementById("svgMindmapImage"+nr).innerHTML = svg.svg()
     if(dynamic)
-    document.getElementById("svgMindmapImage"+nr).innerHTML = svg.svgDynamic()
+        document.getElementById("svgMindmapImage"+nr).innerHTML = svg.svgDynamic()
 }
 
 update(1)
