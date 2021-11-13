@@ -50,12 +50,26 @@
                 <textarea id="svgChartTAL2" rows="10" cols="60"></textarea></td>
         </tr>
     </table>
+    <h2>Function chart</h2>
+    <table border="1">
+        <tr>
+            <td><img id="svgChartImageF1"/></td>
+            <td><button onclick="update('F1')">Update</button><br>
+                <textarea id="svgChartTAF1" rows="10" cols="60"></textarea></td>
+        </tr>
+        <tr>
+            <td><img id="svgChartImageF2"/></td>
+            <td><button onclick="update('F2')">Update</button><br>
+                <textarea id="svgChartTAF2" rows="10" cols="60"></textarea></td>
+        </tr>
+    </table>
 </body>
 <script>
 document.getElementById("svgChartTAB1").value = `{
     size: [300, 300],
     grid:true, gridStep:0.5,
     axis: true,
+    axisToFixed: 1,
     maxHeight: 6,
 }, [
     [1,2,3,4],
@@ -98,6 +112,21 @@ document.getElementById("svgChartTAL2").value = `{
     [2,5,2,1],
     [4,3,-2,2],
 ]`
+document.getElementById("svgChartTAF1").value = `{
+    size: [300, 300],
+    grid:true,
+    axis: true,
+}, [
+    "sin(x)*cos(x)",
+    "sin(x)*x"
+]`
+document.getElementById("svgChartTAF2").value = `{
+    size: [300, 300],
+    grid:true,
+    axis: true,
+}, [
+    "x"
+]`
 
 update = function(nr){
     let f = ""
@@ -105,6 +134,7 @@ update = function(nr){
         case 'B': f = "BF.svg.chart.bar"; break;
         case 'P': f = "BF.svg.chart.pie"; break;
         case 'L': f = "BF.svg.chart.line"; break;
+        case 'F': f = "BF.svg.chart.function"; break;
     }
     let svg = eval(f+"("+document.getElementById("svgChartTA"+nr).value+")")
     document.getElementById("svgChartImage"+nr).src = "data:image/svg+xml;base64,"+btoa(svg)
@@ -116,6 +146,9 @@ update("P1")
 update("P2")
 update("L1")
 update("L2")
+update("P2")
+update("F1")
+update("F2")
     
 </script>
 </html>

@@ -436,7 +436,7 @@ BF.svg.mindmap = function(){
                     'onpointerout="BF.svg.mindmap.func[\''+ID+'_u\'](event)" ',
                     'onpointercancel="BF.svg.mindmap.func[\''+ID+'_u\'](event)" ',
                     'onlostpointercapture="BF.svg.mindmap.func[\''+ID+'_u\'](event)" ',
-                    'style="-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;-ms-touch-action: manipulation;touch-action:manipulation;"',
+                    'style="-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;-ms-touch-action: manipulation;touch-action: none;"',
                     '>']
         svg[svg.length] = '<line id="'+ID+'_direct" style="opacity:0" stroke="black" stroke-width="3"/>'
 
