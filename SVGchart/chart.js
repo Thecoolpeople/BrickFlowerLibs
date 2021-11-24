@@ -256,9 +256,12 @@ BF.svg.chart.function = function(config, data){
 
     //math function
     let funcs = Array.from({length:nrFunction}).map((e,i)=>{
-        return new Function("x","with(Math){return("+data[i]+").toFixed("+conf.toFixed+")}")
+        let func = data[i].replaceAll("^", "**")
+        return new Function("x","with(Math){return("+func+").toFixed("+conf.toFixed+")}")
     })
-    let nrData = Array.from({length:nrFunction}).map((e,nr)=>Array.from({length:len}, (_,i)=>funcs[nr](conf.resolution*i)))
+    let nrData = Array.from({length:nrFunction}).map((e,nr)=>{
+        return Array.from({length:len}, (_,i)=>funcs[nr](conf.resolution*i + conf.lenXmin))
+    })
 
-    return BF.svg.chart.line(Object.assign(conf, {mode:"bezier", X0step:1/conf.resolution}), nrData)
+    return BF.svg.chart.line(Object.assign(conf, {mode:"bezier", X0step:1/conf.resolution, X0:conf.lenXmin}), nrData)
 }
