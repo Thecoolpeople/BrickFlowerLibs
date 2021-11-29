@@ -118,6 +118,15 @@ BF.svg.mindmap = function(){
                 }
             }
         },
+        dynamic_markNode: function(GroupElement, mode){
+            //TODO colors
+            if(mode == 1){
+                GroupElement.children[0].style.stroke = "green"  //rect
+            }
+            if(mode == 0){
+                GroupElement.children[0].style.stroke = "black"  //rect
+            }
+        },
         dynamic_change2Textbox: function(GroupElement){
             //set nodes to opacity 0
             GroupElement.children[0].style.opacity = 0  //rect
@@ -157,9 +166,6 @@ BF.svg.mindmap = function(){
             //update the I.data object
             let id = GroupElement.getAttribute("nodeid")
             I.data[id].title = text
-
-            //redraw the whole svg
-            I.dynamic_svgRedraw()
         },
         dynamic_svgRedraw: async function(){
             T.dyn_svg.outerHTML = T.svgDynamic()
@@ -189,7 +195,6 @@ BF.svg.mindmap = function(){
             }
             return false
         },
-
     }
 
     T.setData = function(config, data){
@@ -285,18 +290,45 @@ BF.svg.mindmap = function(){
                 id = parseInt(id)
 
                 if(T.lastID != id){
-                    if(T.lastGroup && T.lastGroup.children.length == 3) I.dynamic_change2node(T.lastGroup)      //set textbox back
+                    //other node was selected
+                    if(T.lastGroup){
+                        I.dynamic_markNode(T.lastGroup, 0)
+                        if(T.lastGroup.children.length == 3){
+                            I.dynamic_change2node(T.lastGroup)      //set textbox back
+                            //redraw the whole svg
+                            I.dynamic_svgRedraw()
+                            return
+                        }
+                    }
+                    
                     T.firstClick = true     //first click
                     T.lastID = id
                     T.lastGroup = g
+                    I.dynamic_markNode(g, 1)
 
                     T.pos = I.dynamic_calcPos(event)
+
                 }else{
-                    T.firstClick = false    //second click
-                    if(g.children.length == 2) I.dynamic_change2Textbox(g)  //change texts into textbox
+                    if(T.firstClick == true){
+                        T.firstClick = false    //second click
+                        if(g.children.length == 2) I.dynamic_change2Textbox(g)  //change texts into textbox
+                    }else{
+                        //third, fourth, ... click
+                    }
+
                 }
             }else{
-                if(T.lastGroup && T.lastGroup.children.length == 3) I.dynamic_change2node(T.lastGroup)  //set textbox back
+                //other node was selected
+                if(T.lastGroup){
+                    I.dynamic_markNode(T.lastGroup, 0)
+                    
+                    if(T.lastGroup.children.length == 3){
+                        I.dynamic_change2node(T.lastGroup)      //set textbox back
+                        //redraw the whole svg
+                        I.dynamic_svgRedraw()
+                    }
+                }
+                
                 T.firstClick = false
                 T.lastID = null
                 T.lastGroup = null

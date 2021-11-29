@@ -26,7 +26,6 @@ BF.svg.chart.internalGridX = function(svg, spaceLeft, conf){
         let x = spaceLeft[0] + conf.singeWidth*i
 
         svg[svg.length] = '<line x1="'+x+'" y1="'+(spaceLeft[2]-15)+'" x2="'+x+'" y2="'+(spaceLeft[3]-5)+'" stroke="black" stroke-width="0.5" style="opacity:0.5;" />'    //axis height line
-        console.log((i+conf.X0).toFixed(conf.axisToFixed))
         if(conf.axis)
             svg[svg.length] = '<text text-anchor="end" transform="translate('+x+', '+(spaceLeft[3]-5)+') rotate(-90)" dy=".3em">'+(i/conf.X0step+conf.X0).toFixed(conf.axisToFixed)+'</text>'    //left axis text
     }
