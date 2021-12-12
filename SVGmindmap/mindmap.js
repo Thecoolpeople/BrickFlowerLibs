@@ -108,7 +108,8 @@ BF.svg.mindmap = function(){
             let drawLine = function(p1, p2, color="black", strokeWidth=1.5){
                 return '<path d="M '+p1[0]+' '+p1[1]+' C '+p2[0]+' '+p1[1]+', '+p1[0]+' '+p2[1]+', '+p2[0]+' '+p2[1]+'" fill="none" stroke-width="'+strokeWidth+'" stroke="'+color+'"/>'
             }
-            for(let id = 0; id < I.nrData; id++){
+            for(let id = 0; id < I.data.length; id++){
+                if(I.data[id] != null)  //check if there is a node at the position
                 for(let s = 0; I.data[id].sub && s < I.data[id].sub.length; s++){
                     //check positions
                     if(positionsXY[id].x < positionsXY[I.data[id].sub[s]].x)    //right arm
@@ -198,30 +199,30 @@ BF.svg.mindmap = function(){
     }
 
     T.setData = function(config, data){
-        I.conf = Object.assign({
-            size: [400, 400],   //width, height  this is the display size   [-1,-1] for the original size
-            boxLength: 100,
-            boxDistance: [30,16],
-            boxTextPx: 16,
+        if(config){
+            I.conf = Object.assign({
+                size: [400, 400],   //width, height  this is the display size   [-1,-1] for the original size
+                boxLength: 100,
+                boxDistance: [30,16],
+                boxTextPx: 16,
 
-            //TODO
-            display: 'compress',    //the mode for display. 'compress': for most smallest image, 'normal' for most nice display
-    
-            colorText:"black",
-            colorBorder:"black",
-            colorBack:"transparent",
-            colorLine:"black",
-    
-            font: 'New Times Roman,serif',  //default svg font
-            charNumber16px: BF.svg.mindmapDefaultCharArray,
-            charLength16px: [11.55,10.67,10.67,11.55,9.77,8.90,11.55,11.55,5.33,6.23,11.55,9.77,14.23,11.55,11.55,8.90,11.55,10.67,8.90,9.77,11.55,11.55,15.10,11.55,11.55,9.77,7.10,8.00,7.10,8.00,7.10,5.33,8.00,8.00,4.45,4.45,8.00,4.45,12.45,8.00,8.00,8.00,8.00,5.33,6.23,4.45,8.00,8.00,11.55,8.00,8.00,7.10,11.55,7.10,11.55,8.00,11.55,8.00,8.00,8.00,8.00,8.00,8.00,8.00,8.00,8.00,8.00,8.00,8.00,4.00,4.00,4.45,4.45,7.10,5.33,8.00,8.00,4.45,4.00,8.00]
-        }, config);
-    
-        I.nrData = data.length
-        if(I.nrData == 0){
-            return ""
+                //TODO
+                display: 'compress',    //the mode for display. 'compress': for most smallest image, 'normal' for most nice display
+        
+                colorText:"black",
+                colorBorder:"black",
+                colorBack:"transparent",
+                colorLine:"black",
+        
+                font: 'New Times Roman,serif',  //default svg font
+                charNumber16px: BF.svg.mindmapDefaultCharArray,
+                charLength16px: [11.55,10.67,10.67,11.55,9.77,8.90,11.55,11.55,5.33,6.23,11.55,9.77,14.23,11.55,11.55,8.90,11.55,10.67,8.90,9.77,11.55,11.55,15.10,11.55,11.55,9.77,7.10,8.00,7.10,8.00,7.10,5.33,8.00,8.00,4.45,4.45,8.00,4.45,12.45,8.00,8.00,8.00,8.00,5.33,6.23,4.45,8.00,8.00,11.55,8.00,8.00,7.10,11.55,7.10,11.55,8.00,11.55,8.00,8.00,8.00,8.00,8.00,8.00,8.00,8.00,8.00,8.00,8.00,8.00,4.00,4.00,4.45,4.45,7.10,5.33,8.00,8.00,4.45,4.00,8.00]
+            }, config);
         }
-        I.data = data
+
+        if(data){
+            I.data = JSON.parse(JSON.stringify(data))
+        }
     }
     T.getData = function(){
         return I.data
@@ -347,7 +348,7 @@ BF.svg.mindmap = function(){
                 let oldParent = null
                 let index = null
                 for(let i=0; i < I.data.length; i++){
-                    if(I.data[i].sub && I.data[i].sub.includes(T.lastID)){
+                    if(I.data[i] && I.data[i].sub && I.data[i].sub.includes(T.lastID)){
                         oldParent = i
                         index = I.data[i].sub.indexOf(T.lastID)
                     }
@@ -491,6 +492,53 @@ BF.svg.mindmap = function(){
         })
         
         return svg.join("")+'</svg>'
+    }
+    T.dynamic_addNode = function(parentNodeID, nodeContent = {title:"text"}){
+        let nodeid = null
+            let i=0
+            while(true){
+                if(!I.data[i]){
+                    nodeid = i
+                    break;
+                }
+                i++;
+            }
+            I.data[nodeid] = nodeContent
+            if(!I.data[parentNodeID].sub) I.data[parentNodeID].sub = []
+            I.data[parentNodeID].sub[I.data[parentNodeID].sub.length] = nodeid
+    }
+    T.dynamic_deleteNode = function(nodeID){
+        //get parent node
+        let getParent;getParent = function(id, searchNodeID){
+            if(I.data[id].sub){
+                if(I.data[id].sub.includes(searchNodeID)){
+                    return id
+                }else{
+                    let ret = false
+                    for(let i=0; i < I.data[id].sub.length; i++){
+                        ret |= getParent(I.data[id].sub[i], searchNodeID)
+                    }
+                    return ret
+                }
+            }
+        }
+        let parentID = getParent(0, nodeID)
+
+        //delete reference from parent node
+        let index = I.data[parentID].sub.indexOf(nodeID);
+        if (index !== -1) {
+            I.data[parentID].sub.splice(index, 1);
+        }
+        //delete node and all sub recursively
+        let deleteRecursive;deleteRecursive = function(id){
+            if(I.data[id].sub){
+                for(let i=0; i < I.data[id].sub.length; i++){
+                    deleteRecursive(I.data[id].sub[i])
+                }
+            }
+            I.data[id] = null
+        }
+        deleteRecursive(nodeID)
     }
 
     return this

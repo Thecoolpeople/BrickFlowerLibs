@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TESTING</title>
+    
+    <script src="../pre.js"></script>
+    <script src="3d.js"></script>
+    <script src="../post.js"></script>
+</head>
+<body>
+    <h1>TESTING</h1>
+    <h2>3D Projection</h2>
+    <table border="1">
+        <tr>
+            <td><img id="svgImage1"/></td>
+            <td><button onclick="update('1')">Update</button><br>
+                <textarea id="svg1" rows="10" cols="60"></textarea></td>
+        </tr>
+    </table>
+</body>
+<script>
+document.getElementById("svg1").value = `{
+    size: [300, 300],
+}, [
+    [1,2,3,4],
+    [2,5,2,1],
+    [4,3,2,1],
+]`
+
+update = function(nr){
+    let svg = eval("BF.svg.D3("+document.getElementById("svg"+nr).value+")")
+    document.getElementById("svgImage"+nr).src = "data:image/svg+xml;base64,"+btoa(svg)
+}
+
+update("1")
+    
+</script>
+</html>
