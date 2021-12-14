@@ -14,7 +14,7 @@
     <h2>3D Projection</h2>
     <table border="1">
         <tr>
-            <td><img id="svgImage1"/></td>
+            <td><div id="svgImage1" type="image/svg+xml"  style="-ms-touch-action: manipulation;touch-action:manipulation;"></div></td>
             <td><button onclick="update('1')">Update</button><br>
                 <textarea id="svg1" rows="10" cols="60"></textarea></td>
         </tr>
@@ -22,16 +22,17 @@
 </body>
 <script>
 document.getElementById("svg1").value = `{
-    size: [300, 300],
+    size: [400, 300],
+    cameraPos: [5,5,5],
+    lookAt: [0,0,0]
 }, [
-    [1,2,3,4],
-    [2,5,2,1],
-    [4,3,2,1],
+    ['p', 2,2,2],
+    ['p', 2.8,2.5,2.7],
 ]`
 
 update = function(nr){
     let svg = eval("BF.svg.D3("+document.getElementById("svg"+nr).value+")")
-    document.getElementById("svgImage"+nr).src = "data:image/svg+xml;base64,"+btoa(svg)
+    document.getElementById("svgImage"+nr).innerHTML = svg
 }
 
 update("1")

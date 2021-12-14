@@ -32,7 +32,7 @@ BF.svg.mindmap = function(){
                     let textLines = I.calcTextLines(I.data[id].title, I.data[id].size?I.data[id].size:I.conf.boxTextPx)
                     positionArray[depth][positionArray[depth].length] = [id, textLines, textLines.length*(I.data[id].size?I.data[id].size:I.conf.boxTextPx)]  //insert actual node
                     
-                    if(I.data[id].sub && I.data[id].sub.length != 0){
+                    if(I.data[id] && I.data[id].sub && I.data[id].sub.length != 0){
                         for(let i=0; i < I.data[id].sub.length; i++){
                             calcPositions(I.data[id].sub[i], positionArray, depth+1)
                         }

@@ -15,12 +15,18 @@ Just click on a link an you get to the testing file in the folder directly in yo
 All the SVG libraries:
 - [svg.chart](https://raw.githack.com/Thecoolpeople/BrickFlowerLibs/main/SVGchart/0testing.html)
 - [svg.mindmap](https://raw.githack.com/Thecoolpeople/BrickFlowerLibs/main/SVGmindmap/0testing.html)
+- [svg.D3](https://raw.githack.com/Thecoolpeople/BrickFlowerLibs/main/SVG3D/0testing.html)
 
 ## ToDo
 - browserdb: virtual FileSystem
 - osgui: windows
-- svg.mindmap: dynamic: change settings of nodes
+- svg.mindmap: dynamic: change settings of nodes with buttons directly in the svg
+- svg.d3: zindex drawing, polygons, textures on polygons, ...
+- svg.d3: cubes, circles, ...
 
 ## Contribution
 Just fork, edit and create a pull request
 If you find any bugs or you have some wishes, open an issue and I will have a look.
+
+## Contributors
+Thanks to [Luke100000](https://github.com/Luke100000) for helping with 3D Transformations in svg.d3
