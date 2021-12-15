@@ -17,6 +17,7 @@ BF.svg.D3 = function(config, data){
         
         cameraPos: [5,5,5], //position of the camera
         lookAt: [0,0,0], //position to look at
+        scale: 1, //the scale of the drawing
     }, config);
 
     let M = {
@@ -83,12 +84,11 @@ BF.svg.D3 = function(config, data){
             }
             
             zaxis = normal([lookAt[0]-camera[0], lookAt[1]-camera[1], lookAt[2]-camera[2]])
-            xaxis = normal(cross(zaxis, [0,0,-1])) //vector is Up
+            xaxis = normal(cross(zaxis, [0,0,1])) //vector is Up
             yaxis = cross(xaxis, zaxis)
-            //transponiert
-            return[
+            return [
                 xaxis[0], xaxis[1], xaxis[2], -dot(xaxis, camera),
-                yaxis[0], yaxis[1], yaxis[2], -dot(yaxis, camera),
+                -yaxis[0], -yaxis[1], -yaxis[2], dot(yaxis, camera),
                 -zaxis[0], -zaxis[1], -zaxis[2], dot(zaxis, camera),
                 0, 0, 0, 1
             ]
@@ -133,6 +133,12 @@ BF.svg.D3 = function(config, data){
         },
         l: function(point1, point2){
             return '<line x1="'+point1[0]+'" y1="'+point1[1]+'" x2="'+point2[0]+'" y2="'+point2[1]+'" stroke="black"/>'
+        },
+        g: function(points){
+            let p = points.filter(function(_, i){ //delete every third element
+                return (i + 1) % 3;
+            })
+            return '<polygon points="'+p.join(",")+'" stroke="black" fill="green" fill-opacity="0.5"/>'
         }
     }
 
@@ -156,20 +162,90 @@ BF.svg.D3 = function(config, data){
 
     //calculate the translation matrix
     let look = M.LookM(conf.cameraPos, conf.lookAt)
-    let ortho = M.OrthoProj(0, conf.size[0], 0, conf.size[1], 0.5)
+    let ortho = M.OrthoProj(0, conf.size[0], 0, conf.size[1], conf.scale)
     let T = M.mat4(ortho, look)
 
     let svg = ['<svg xmlns="http://www.w3.org/2000/svg" width="'+conf.size[0]+'" height="'+conf.size[1]+'">']
 
-    //coord system
+    //coord system //TODO remove or put it into a if
     svg[svg.length] = Draw.l(M.mat4vec(T, [-1,0,0,1]), M.mat4vec(T, [1,0,0,1]))
     svg[svg.length] = Draw.l(M.mat4vec(T, [0,-1,0,1]), M.mat4vec(T, [0,1,0,1]))
     svg[svg.length] = Draw.l(M.mat4vec(T, [0,0,-1,1]), M.mat4vec(T, [0,0,1,1]))
 
+    //precalc the coordinates
+    points = []
+    for(let i = 0; i < data.length; i++){
+        switch(data[i].id){
+        case 'p':
+            points[points.length] = [
+                'p',
+                M.mat4vec(T, [...data[i].p,1]).slice(0,3)
+            ]
+        break;
+        case 'l':
+            points[points.length] = [
+                'l',
+                M.mat4vec(T, [...data[i].p1,1]).slice(0,3),
+                M.mat4vec(T, [...data[i].p2,1]).slice(0,3)
+            ]
+        break;
+        case 'g':
+            let l = points.length
+            points[l] = ['g', []]
+            for(let a = 0; data[i]['p'+(a+1)]; a++){
+                let p1 = M.mat4vec(T, [...data[i]['p'+(a+1)],1])
+                points[l][1][a*3] =   p1[0]
+                points[l][1][a*3+1] = p1[1]
+                points[l][1][a*3+2] = p1[2]
+            }
+        break;
+        case 'cube': 
+            //p1 = M.mat4vec(T, [data[i][1]-data[i][4]/2, data[i][2]-data[i][5]/2, data[i][3]-data[i][6]/2])
+            let p1 = M.mat4vec(T, [data[i].p[0]+data[i].s[0]/2, data[i].p[1]-data[i].s[1]/2, data[i].p[2]-data[i].s[2]/2, 1]).slice(0,3)
+            let p2 = M.mat4vec(T, [data[i].p[0]+data[i].s[0]/2, data[i].p[1]+data[i].s[1]/2, data[i].p[2]-data[i].s[2]/2, 1]).slice(0,3)
+            let p5 = M.mat4vec(T, [data[i].p[0]+data[i].s[0]/2, data[i].p[1]-data[i].s[1]/2, data[i].p[2]+data[i].s[2]/2, 1]).slice(0,3)
+            let p6 = M.mat4vec(T, [data[i].p[0]+data[i].s[0]/2, data[i].p[1]+data[i].s[1]/2, data[i].p[2]+data[i].s[2]/2, 1]).slice(0,3)
+
+            let p3 = M.mat4vec(T, [data[i].p[0]-data[i].s[0]/2, data[i].p[1]-data[i].s[1]/2, data[i].p[2]-data[i].s[2]/2, 1]).slice(0,3)
+            let p4 = M.mat4vec(T, [data[i].p[0]-data[i].s[0]/2, data[i].p[1]+data[i].s[1]/2, data[i].p[2]-data[i].s[2]/2, 1]).slice(0,3)
+            let p7 = M.mat4vec(T, [data[i].p[0]-data[i].s[0]/2, data[i].p[1]-data[i].s[1]/2, data[i].p[2]+data[i].s[2]/2, 1]).slice(0,3)
+            let p8 = M.mat4vec(T, [data[i].p[0]-data[i].s[0]/2, data[i].p[1]+data[i].s[1]/2, data[i].p[2]+data[i].s[2]/2, 1]).slice(0,3)
+            points[points.length] = ['g', [...p1, ...p2, ...p6, ...p5]]
+            points[points.length] = ['g', [...p1, ...p2, ...p4, ...p3]]
+            points[points.length] = ['g', [...p2, ...p4, ...p8, ...p6]]
+            points[points.length] = ['g', [...p5, ...p6, ...p8, ...p7]]
+            points[points.length] = ['g', [...p1, ...p3, ...p7, ...p5]]
+            points[points.length] = ['g', [...p3, ...p4, ...p8, ...p7]]
+        break;
+        }
+    }
+    
+    //sorting after zaxis, to draw the data in the correct order
+    points.sort(function(a,b){
+        let getZ = function(i){
+            switch(i[0]){
+                case 'p': return i[1][2]
+                case 'l': return (i[1][2] + i[2][2])/2  //TODO now it is middle of the line, perhaps other?
+                case 'g':
+                    let s = 0
+                    for(let a = 0; a < i[1].length/3; a++){
+                        s += i[1][a*3+2]
+                    }
+                    return s*3/i.length
+                
+            }
+        }
+        return getZ(a) > getZ(b)
+    })
+
     //drawing the data
-    for (let i = 0; i < data.length; i++){
-        if(data[i][0] == 'p')
-            svg[svg.length] = Draw.p(M.mat4vec(T, [data[i][1],data[i][2],data[i][3],1]), 2)
+    for(let i = 0; i < points.length; i++){
+        if(points[i][0] == 'p')
+            svg[svg.length] = Draw.p(points[i][1], 2)
+        else if(points[i][0] == 'l')
+            svg[svg.length] = Draw.l(points[i][1], points[i][2])
+        else if(points[i][0] == 'g')
+            svg[svg.length] = Draw.g(points[i][1])
     }
     return svg.join("")+'</svg>'
 }

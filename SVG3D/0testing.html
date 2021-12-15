@@ -18,6 +18,11 @@
             <td><button onclick="update('1')">Update</button><br>
                 <textarea id="svg1" rows="10" cols="60"></textarea></td>
         </tr>
+        <tr>
+            <td><div id="svgImage2" type="image/svg+xml"  style="-ms-touch-action: manipulation;touch-action:manipulation;"></div></td>
+            <td><button onclick="update('2')">Update</button><br>
+                <textarea id="svg2" rows="10" cols="60"></textarea></td>
+        </tr>
     </table>
 </body>
 <script>
@@ -26,8 +31,21 @@ document.getElementById("svg1").value = `{
     cameraPos: [5,5,5],
     lookAt: [0,0,0]
 }, [
-    ['p', 2,2,2],
-    ['p', 2.8,2.5,2.7],
+    {id:'p', p:[2,2,2]},
+    {id:'l', p1:[2,2,2], p2:[2.8,2.5,2.7]},
+    {id:'p', p:[2.8,2.5,2.7]},
+    {id:'g', p1:[2,2,2], p2:[1.5,2,2], p3:[2,1.5,2]},
+]`
+document.getElementById("svg2").value = `{
+    size: [400, 300],
+    cameraPos: [2,1,1],
+    lookAt: [0,0,0],
+    scale:0.2,
+}, [
+    {id:'cube', p:[0,0,0], s:[1,1,1]},
+    {id:'cube', p:[2,0,0], s:[1,1,1]},
+    {id:'cube', p:[0,2,0], s:[1,1,1]},
+    {id:'cube', p:[0,0,1], s:[1,1,1]},
 ]`
 
 update = function(nr){
@@ -36,6 +54,7 @@ update = function(nr){
 }
 
 update("1")
+update("2")
     
 </script>
 </html>
