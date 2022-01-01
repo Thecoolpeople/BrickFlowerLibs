@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "documentation": "^13.2.5",
     "javascript-obfuscator": "^3.0.0"
   }
 }

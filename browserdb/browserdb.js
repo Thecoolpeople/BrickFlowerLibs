@@ -53,10 +53,13 @@ BF.browserdb = function(key){
          * @param {string} store_name
          * @param {object} options The options for creating the store
          */
-        createObjectStore: async function(store_name, options = {keyPath: 'id', autoIncrement: true}){
+        createObjectStore: async function(store_name, indexes=[], options = {keyPath: 'id', autoIncrement: true}){
             let version = T.db.version + 1
             await this.openDB(key, version, function(event, db){
-                db.createObjectStore(store_name, options);
+                let os = db.createObjectStore(store_name, options);
+                indexes.forEach(index=>{
+                    os.createIndex(index.name, index.name, {unique:index.unique})
+                })
             })
         },
         /**
@@ -99,15 +102,14 @@ BF.browserdb = function(key){
     
     T.init = async function(){
         await internal.openDB(key)
-        console.log(T.db)
     }
 
     //user funcs
     T.store_getAll = function(){
         return [...T.db.objectStoreNames]
     }
-    T.store_create = async function(storeName, options){
-        return internal.createObjectStore(storeName, options)
+    T.store_create = async function(storeName, indexes, options){
+        return internal.createObjectStore(storeName, indexes, options)
     }
     T.store_delete = async function(storeName){
         return internal.deleteObjectStore(storeName)
@@ -131,7 +133,33 @@ BF.browserdb = function(key){
             };
         })
     }
-    T.entry_delete = async function(storeName, id){
+    T.entry_put = async function(storeName, item, search){
+        if(!search) search = function(entry){return false}
+
+        let store = internal.getObjectStore(storeName, "readwrite")
+        return new Promise(function(resolve, reject){
+            let request = store.openCursor()
+            request.onerror = function(event){
+                alert("Not allowed to use IndexedDB->ObjectStore->openCurser()!");
+                reject(event)
+            }
+            let updatenr = 0
+            request.onsuccess = async function(event){
+                let cursor = event.target.result
+                if(cursor){
+                    if(await search(cursor.value)){
+                        let insertItem = Object.assign(cursor.value, item)
+                        store.put(insertItem)
+                        updatenr++
+                    }
+                    cursor.continue()
+                }else{
+                    resolve(updatenr)
+                }
+            }
+        })
+    }
+    T.entry_delete = async function(storeName, id){ //id is the primaryKey id
         let store = internal.getObjectStore(storeName, "readwrite")
         return new Promise(function(resolve, reject){
             let request = store.delete(id)
@@ -160,6 +188,30 @@ BF.browserdb = function(key){
                 let entries = request.result;
                 resolve(entries)
             };
+        })
+    }
+    T.entry_search = async function(storeName, search){
+        if(!search) search = function(entry){return false}
+
+        let store = internal.getObjectStore(storeName, "readwrite")
+        return new Promise(function(resolve, reject){
+            let request = store.openCursor()
+            request.onerror = function(event){
+                alert("Not allowed to use IndexedDB->ObjectStore->openCurser()!");
+                reject(event)
+            }
+            let ret = Array()
+            request.onsuccess = function(event){
+                let cursor = event.target.result
+                if(cursor){
+                    if(search(cursor.value)){
+                        ret[ret.length] = cursor.value
+                    }
+                    cursor.continue()
+                }else{
+                    resolve(ret)
+                }
+            }
         })
     }
 

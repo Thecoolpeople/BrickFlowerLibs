@@ -7,25 +7,32 @@
     
     <script src="../pre.js"></script>
     <script src="browserdb.js"></script>
+    <script src="filesystem.js"></script>
     <script src="../post.js"></script>
 </head>
 <body>
-    <h1>TESTING</h1>
-    <h2>List of all stores</h2>
-        <div id="stores"></div>
-    <h2>Edit Stores</h2>
-        <input type="text" id="storeName"></input>
-        <button onclick="editStore('create')">create</button>
-        <button onclick="editStore('delete')">delete</button>
-    <h2>Insert into Stores</h2>
-        <select id="storeInsert"></select>
-        <input type="text" id="storeInsert2"></input>
-        <button onclick="insertIntoStore()">insert</button>
-    <h2>Show content in Store</h2>
-        <select id="storeShow"></select>
-        <button onclick="storeShow()">show</button><br>
-        <div id="storeShowContent"></div>
-        
+    <table border="0" width="100%"><tr>
+        <td width="50%" valign="top">
+            <h1>TESTING</h1>
+            <h2>List of all stores</h2>
+                <div id="stores"></div>
+            <h2>Edit Stores</h2>
+                <input type="text" id="storeName"></input>
+                <button onclick="editStore('create')">create</button>
+                <button onclick="editStore('delete')">delete</button>
+            <h2>Insert into Stores</h2>
+                <select id="storeInsert"></select>
+                <input type="text" id="storeInsert2"></input>
+                <button onclick="insertIntoStore()">insert</button>
+            <h2>Show content in Store</h2>
+                <select id="storeShow"></select>
+                <button onclick="storeShow()">show</button><br>
+                <div id="storeShowContent"></div>
+        </td>
+        <td width="50%" valign="top">
+            <h1>TESTING BF.filesystem</h1>
+        </td>
+    </tr></table>
 </body>
 <script>
 reload = function(){
@@ -42,6 +49,9 @@ window.onload = async function(){
     BDB = new BF.browserdb("test", 1)
     await BDB.init()
     reload()
+
+    fs = new BF.filesystem("filesystem")
+    await fs.init()
 }
 editStore = async function(m){
     store = document.getElementById("storeName").value

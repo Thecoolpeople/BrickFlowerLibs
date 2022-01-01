@@ -235,7 +235,7 @@ BF.svg.D3 = function(config, data){
                 
             }
         }
-        return getZ(a) > getZ(b)
+        return getZ(a) - getZ(b)
     })
 
     //drawing the data

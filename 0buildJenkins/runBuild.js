@@ -1,5 +1,6 @@
 const fs = require('fs')
 const JavaScriptObfuscator = require("javascript-obfuscator");
+const documentation = require("documentation");
 
 let obfuscator = function(file){
     return JavaScriptObfuscator.obfuscate(file, {
