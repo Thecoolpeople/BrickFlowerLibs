@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TESTING</title>
+    
+    <script src="../pre.js"></script>
+    <script src="htmlbuttons.js"></script>
+    <script src="../post.js"></script>
+</head>
+<body>
+    <h1>TESTING of HTMLbuttons</h1>
+    <h2>Delete button</h2>
+        <div id="deleteButton"></div>
+        
+</body>
+<script>
+window.onload = async function(){
+    let db = BF.HTMLbuttons.deleteConfirm("dB", '<h1>Delete Account</h1><p>Are you sure you want to delete your account?</p>')
+    document.getElementById("deleteButton").innerHTML = db[0]
+    
+    let style = document.createElement('style')
+    style.innerHTML = db[1]
+    let ref = document.querySelector('script')        //Get the first script tag
+    ref.parentNode.insertBefore(style, ref)           //Insert our new styles before the first script tag
+}
+</script>
+</html>

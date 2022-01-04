@@ -40,4 +40,3 @@ BF.sandbox = function(srcString){
         return code(BF.sandboxProxies.get(sandbox))
     }
 }
-

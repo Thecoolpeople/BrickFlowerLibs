@@ -2,6 +2,21 @@ const fs = require('fs')
 const JavaScriptObfuscator = require("javascript-obfuscator");
 const documentation = require("documentation");
 
+let readFile = function(f){
+    if(f.indexOf(">") == -1){
+        return fs.readFileSync(f, 'utf8')
+    }else{
+        let file = fs.readFileSync(f.split(">")[0], 'utf8')
+        file = file.split(f.split(">")[1])
+        let folder = f.substring(0,f.lastIndexOf("/")+1)
+        for(let i=1; i<file.length; i+=2){
+            let subfile = file[i]
+            file[i] = fs.readFileSync(folder+subfile, 'utf8')
+        }
+        return file.join('')
+    }
+}
+
 let obfuscator = function(file){
     return JavaScriptObfuscator.obfuscate(file, {
         simplify: true,
@@ -24,7 +39,7 @@ let buildFiles = function(files){
     let F = [].concat(files, ["../post.js"])
     let file = ""
     for(f of F){
-        file += fs.readFileSync(f, 'utf8')+'\n\n';
+        file += readFile(f)+'\n\n';
     }
     return obfuscator(file)
 }
@@ -41,7 +56,7 @@ for(f of folders){
         console.log("start building: "+f)
         let buildPath = "../0build/"+f+".js"
         let files = []
-        files = files.concat(fs.readFileSync("../"+f+"/0build.txt", 'utf8').split("\r\n").map(i=>{return "../"+f+"/"+i}))
+        files = files.concat(readFile("../"+f+"/0build.txt").split("\r\n").map(i=>{return "../"+f+"/"+i}))
         wholeFiles = wholeFiles.concat(files)
         console.log(files)
         
@@ -53,7 +68,14 @@ for(f of folders){
 
 console.log("start building ALL")
 //unique wholeFiles
-wholeFiles = wholeFiles.map(e=>{return fs.realpathSync(e)})
+wholeFiles = wholeFiles.map(e=>{
+    if(e.indexOf(">") == -1){
+        return fs.realpathSync(e).replaceAll("\\", "/")
+    }else{
+        let f = e.split(">")
+        return fs.realpathSync(f[0]).replaceAll("\\", "/")+">"+f[1]
+    }
+})
 wholeFiles = [...new Set(wholeFiles)]
 console.log(wholeFiles.join("\n"))
 let build = buildFiles(wholeFiles)

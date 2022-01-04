@@ -1,0 +1,4 @@
+<svg aria-hidden="true" focusable="false" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500">
+    <!-- bottom --><path fill="transparent" d="M50,80 L100,480 L300,480 L350,80 Z" stroke-width="20" stroke="currentColor"></path>
+    <!-- top    --><path fill="transparent" d="M10,50 L390,50 L250,50 L230,10 L170,10 L150,50" stroke-width="20" stroke="currentColor"></path>
+</svg>
